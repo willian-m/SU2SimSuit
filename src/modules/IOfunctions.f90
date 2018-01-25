@@ -22,7 +22,6 @@ module IOfunctions
    contains
       
       subroutine writeLattice(sweepNum)
-         implicit none
          integer,intent(in) :: sweepNum
          character(len=50) :: fileName
          write(filename,"('links',4I3.3,'beta',F4.2,'Sweep',I9.9,'.dat')") nx,ny,nz,nt,beta,sweepNum
@@ -32,13 +31,10 @@ module IOfunctions
       end subroutine
 
       subroutine readLattice(filename)
-      use lattice
-      character(len=50), intent(in) :: filename
-
-      open(unit=10,status='old',file=filename,form='unformatted')
-      read(10) U
-      close(10)
-
+         character(len=50), intent(in) :: filename
+         open(unit=10,status='old',file=filename,form='unformatted')
+         read(10) U
+         close(10)
       end subroutine readLattice
 
 
