@@ -1,0 +1,295 @@
+module Measurements
+    use physics
+    use lattice
+    use mathSU2
+    implicit none
+    
+    double precision, dimension(:,:,:,:), allocatable :: T0iT0j
+    double precision, dimension(:,:), allocatable :: V
+
+
+    contains
+    
+!===ALLOCATE THE NEEDED VECTORS
+    subroutine allocateVectorsMeasurements()
+    implicit none
+    integer :: r,t,x,d1,d2,minSize
+    
+    minSize=min(nx,ny,nz)
+    
+    allocate(T0iT0j(3,3,nz,nt))
+    allocate(V(minSize,nt))
+    
+    do r=1,nz
+        do t=1,nt
+            do d1=1,3
+                do d2=1,3
+                    T0iT0j(d1,d2,r,t) = 0.d0
+                end do
+            end do
+        end do
+    end do
+    
+    do r=1,minSize
+        do t=1,nt
+            V(r,t)=0.d0
+        end do
+    end do
+
+    end subroutine
+ 
+!===COMPUTE Fmunu(m)
+    subroutine ComputeFmunu(mu,nu,i,j,k,l,F)
+    integer, intent(in) :: mu,nu,i,j,k,l
+    type(su2matrix), intent(out) :: F
+    integer :: x,m
+    double precision, dimension(4) :: plaq,Q1,Q2
+    
+    x=position(i,j,k,l)
+    do m=1,4
+        Q1(m) = 0.d0
+        Q2(m) = 0.d0
+    end do
+    
+    !Starting computing first clover
+    call plaquette(2*mu,2*nu,i,j,k,l,plaq) !First leaf
+    call sumSU2( Q1, plaq, Q1 )
+    
+    call plaquette(2*nu,2*mu-1,i,j,k,l,plaq)! Second leaf
+    call sumSU2( Q1, plaq, Q1 )
+    
+    call plaquette(2*mu-1,2*nu-1,i,j,k,l,plaq)! Third leaf
+    call sumSU2( Q1, plaq, Q1 )
+    
+    call plaquette(2*nu-1,2*mu,i,j,k,l,plaq)! Fourth leaf
+    call sumSU2( Q1, plaq, Q1 )
+    
+    
+    !Starting computing second clover
+    call plaquette(2*nu,2*mu,i,j,k,l,plaq) !First leaf
+    call sumSU2( Q2, plaq, Q2 )
+    
+    call plaquette(2*mu,2*nu-1,i,j,k,l,plaq)! Second leaf
+    call sumSU2( Q2, plaq, Q2 )
+    
+    call plaquette(2*nu-1,2*mu-1,i,j,k,l,plaq)! Third leaf
+    call sumSU2( Q2, plaq, Q2 )
+    
+    call plaquette(2*mu-1,2*nu,i,j,k,l,plaq)! Fourth leaf
+    call sumSU2( Q2, plaq, Q2 )
+ 
+    
+    !We invert the signal of Q2
+    do m=1,4
+        Q2(m) = -Q2(m)
+    end do
+    
+    !And sum them
+    call sumSU2(Q1,Q2,F%a)
+    
+    !Finally, divide everything by 8
+    do m=1,4
+        F%a(m) = -F%a(m)/8.d0
+    end do
+    end subroutine
+    
+!===Compute Off-Diagonal tensor components at temporal direction of the entire lattice
+    subroutine CalcT0i(T0i)
+    integer :: mu,nu,x,i,j,k,l
+    double precision, dimension(3,0:nx*ny*nz*nt-1), intent(out) :: T0i
+    type(su2matrix),dimension(3,0:nx*ny*nz*nt-1) :: F0i
+    double precision, dimension(4) ::Uaux
+    
+    !Compute Fmunu over the entire lattice
+    do l=1,nt
+    do k=1,nz
+    do j=1,ny
+    do i=1,nx
+        do mu=1,3
+            x = position(i,j,k,l)
+            call ComputeFmunu(4,mu,i,j,k,l,F0i(mu,x))
+        end do
+    end do
+    end do
+    end do
+    end do
+        
+            
+    !Compute T0i over the entire lattice
+    do x=0,nx*ny*nz*nt-1
+        do mu=1,3
+            call matrix_multiply(F0i(mu,x)%a,F0i(mu,x)%a,Uaux)
+            T0i(mu,x) = beta*Tr(Uaux)/2.d0
+        end do
+    end do
+
+    end subroutine
+    
+!===Compute T0iT0j
+    subroutine CalcT0iT0j()
+    implicit none
+    double precision, dimension(3,0:nx*ny*nz*nt-1) :: T0i
+    double precision, dimension(3,3,0:nx*ny*nz*nt-1) :: TmunuCorr
+    double precision :: soma 
+    !double precision, dimension(3,3,0:nx*ny*nz*nt-1), intent(out) :: T0iT0j
+    integer :: x,xf,y,d1,d2,i,j,k,l
+    
+    call CalcT0i(T0i)
+    
+    !We will compute <T0i(x)T0j(0)> = sum(T0i(x+y)T0j(y),y)/(nx*ny*nz*nt
+    do x=0,nx*ny*nz*nt-1 !Selects xf
+        do d1=1,3
+            do d2=1,3      
+                !Starts average over the entire lattice
+                soma=0.d0
+                y=0
+                xf = x
+                soma = soma + T0i(d1,xf)*T0i(d2,y)
+                do l=1,nt! shifts x and y by 1 in t direction
+                    xf = xf + incrementTable(xf,8)
+                    y = y + incrementTable(y,8)
+                    soma = soma + T0i(d1,xf)*T0i(d2,y)
+                    do k=1,nz! shifts x and y by 1 in z direction
+                        xf = xf + incrementTable(xf,6)
+                        y = y + incrementTable(y,6)
+                        soma = soma + T0i(d1,xf)*T0i(d2,y)
+                        do j=1,ny! shifts x and y by 1 in y direction
+                            xf = xf + incrementTable(xf,4)
+                            y = y + incrementTable(y,4)
+                            soma = soma + T0i(d1,xf)*T0i(d2,y)
+                            do i=1,nx! shifts x and y by 1 in x direction
+                                xf = xf + incrementTable(xf,2)
+                                y = y + incrementTable(y,2)
+                                soma = soma + T0i(d1,xf)*T0i(d2,y)
+                            end do
+                        end do
+                    end do
+                end do
+                TmunuCorr(d1,d2,x) = soma/dble((nx-1)*(ny-1)*(nz-1)*(nt-1)+1)
+            end do
+        end do
+    end do
+    
+    !But it is not over yet! Due to the isotropy of the 3 spatial dimensions, we can do
+    !C(x,y,z,t) = T0iT0j(x,y,z,t)
+    !C(x0,y0,z,t0) = C(x0,y0,z,t0) = C(y0,z,x0,t0) = C(y0,z,x0,t0) = C(z,x0,y0,t0) = C(z,y0,x0,t0)
+    !T0iT0j(z,t) = soma_x0=1^nx soma_y0=1^ny C(x0,y0,z,t0) + C(x0,y0,z,t0) + C(y0,z,x0,t0) + C(y0,z,x0,t0) + C(z,x0,y0,t0) + C(z,y0,x0,t0)
+    
+    !But thats not all once again. T0iT0j = T0jT0i
+    do d1=1,3
+        do d2=1,3
+            do l=1,nt
+                do k=1,nz
+                    soma = 0.d0
+                    do j=1,ny
+                        do i=1,nx
+                            soma = soma + TmunuCorr(d1,d2,position(i,j,k,l))+TmunuCorr(d1,d2,position(j,i,k,l))+TmunuCorr(d1,d2,position(i,k,j,l))+TmunuCorr(d1,d2,position(j,k,i,l))+TmunuCorr(d1,d2,position(k,i,j,l))+TmunuCorr(d1,d2,position(k,j,i,l))
+                            soma = soma + TmunuCorr(d2,d1,position(i,j,k,l))+TmunuCorr(d2,d1,position(j,i,k,l))+TmunuCorr(d2,d1,position(i,k,j,l))+TmunuCorr(d2,d1,position(j,k,i,l))+TmunuCorr(d2,d1,position(k,i,j,l))+TmunuCorr(d2,d1,position(k,j,i,l))
+                        end do
+                    end do
+                    T0iT0j(d1,d2,k,l) = T0iT0j(d1,d2,k,l) + soma/dble(6*nx*ny)
+                end do
+            end do
+        end do
+    end do
+    
+    end subroutine
+    
+    
+!===Compute a Line starting at "x0", going in direction "dir" and of size "size"
+    subroutine Line(dir,x,size,WL)
+    implicit none
+    integer, intent(in) :: dir,x,size
+    type(su2matrix),intent(out) :: WL
+    type(su2matrix) :: Uaux
+    integer :: x0,x1,i
+    
+    x0 = x
+    WL=U(dir,x0)
+     
+    do i=1,size-1
+        x1 = x0+incrementTable(x0,dir)
+        call matrix_multiply(WL%a,U(dir,x1)%a,Uaux%a)
+        WL = Uaux
+        x0 = x1
+    end do
+       
+    end subroutine
+
+!===Computes polyakov loop 
+    double precision function polyakovLoop()
+    implicit none
+    type(su2matrix) :: TL
+    type(su2matrix) :: Uaux
+    integer :: x0,x1,i,j,k,l
+    polyakovLoop = 0.d0
+    
+    do k=1,nz
+        do j=1,ny
+            do i=1,nx
+                x0 = position(i,j,k,1)
+                TL=U(8,x0)
+                do l=1,nt-1
+                    x1 = x0+incrementTable(x0,8)
+                    call matrix_multiply(TL%a,U(8,x1)%a,Uaux%a)
+                    TL = Uaux
+                    x0 = x1
+                end do
+                polyakovLoop = polyakovLoop + Tr(TL%a)
+            end do
+        end do
+    end do
+    
+    polyakovLoop=polyakovLoop/dble(nx*ny*nz)    
+    
+    end function
+    
+!===Computes the WilsonLoop
+    !Note: returns the Trace of the Wilson Loop of size r by t.
+    !We also average the loop over the entire lattice and change the direction over the 3 spatial directions
+    !Notice
+    double precision function latticePotential(r,t)
+    implicit none
+    integer,intent(in) :: r,t
+    type(su2matrix) :: WL1,WL2,TT1,TT2 !The 2 Wilson Lines and the 2 Temporal Transporters
+    type(su2matrix) :: Uaux1,Uaux2
+    integer :: x,i,j,k,l,dir,shifter
+    
+    latticePotential = 0.d0
+    !x=position(nx/2,ny/2,nz/2,nt/2)
+
+    
+    do l=1,nt
+    do k=1,nz
+        do j=1,ny
+            do i=1,nx
+                dir=6
+    !             do dir=2,6,2
+                    x=position(i,j,k,l)
+                    call Line(dir,x,r,WL1)
+                    do shifter=1,r
+                        x=x+incrementTable(x,dir)
+                    end do
+                    call Line(8,x,t,TT1)
+                    do shifter=1,t
+                        x=x+incrementTable(x,8)
+                    end do
+                    call Line(dir-1,x,r,WL2)
+                    do shifter=1,r
+                        x=x+incrementTable(x,dir-1)
+                    end do
+                    call Line(7,x,t,TT2)
+                    call matrix_multiply(WL1%a,TT1%a,Uaux1%a)
+                    call matrix_multiply(Uaux1%a,WL2%a,Uaux2%a)
+                    call matrix_multiply(Uaux2%a,TT2%a,Uaux1%a)
+                    latticePotential = latticePotential + Tr(Uaux1%a)
+                !end do
+            end do
+        end do
+    end do
+    end do
+    
+    latticePotential=latticePotential/dble(nx*ny*nz*nt)
+    
+    end function
+end module
