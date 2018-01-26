@@ -9,3 +9,5 @@
 #Old code is put in Old folder and will be ignored
 Old/*
 
+#tmp files to be ignored
+*.swp
