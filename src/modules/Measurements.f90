@@ -4,39 +4,11 @@ module Measurements
     use mathSU2
     implicit none
     
-    double precision, dimension(:,:,:,:), allocatable :: T0iT0j
     double precision, dimension(:,:), allocatable :: V
 
 
     contains
     
-!===ALLOCATE THE NEEDED VECTORS
-    subroutine allocateVectorsMeasurements()
-    implicit none
-    integer :: r,t,x,d1,d2,minSize
-    
-    minSize=min(nx,ny,nz)
-    
-    allocate(T0iT0j(3,3,nz,nt))
-    allocate(V(minSize,nt))
-    
-    do r=1,nz
-        do t=1,nt
-            do d1=1,3
-                do d2=1,3
-                    T0iT0j(d1,d2,r,t) = 0.d0
-                end do
-            end do
-        end do
-    end do
-    
-    do r=1,minSize
-        do t=1,nt
-            V(r,t)=0.d0
-        end do
-    end do
-
-    end subroutine
  
 !===COMPUTE Fmunu(m)
     subroutine ComputeFmunu(mu,nu,i,j,k,l,F)
@@ -123,76 +95,6 @@ module Measurements
         end do
     end do
 
-    end subroutine
-    
-!===Compute T0iT0j
-    subroutine CalcT0iT0j()
-    implicit none
-    double precision, dimension(3,0:nx*ny*nz*nt-1) :: T0i
-    double precision, dimension(3,3,0:nx*ny*nz*nt-1) :: TmunuCorr
-    double precision :: soma 
-    !double precision, dimension(3,3,0:nx*ny*nz*nt-1), intent(out) :: T0iT0j
-    integer :: x,xf,y,d1,d2,i,j,k,l
-    
-    call CalcT0i(T0i)
-    
-    !We will compute <T0i(x)T0j(0)> = sum(T0i(x+y)T0j(y),y)/(nx*ny*nz*nt
-    do x=0,nx*ny*nz*nt-1 !Selects xf
-        do d1=1,3
-            do d2=1,3      
-                !Starts average over the entire lattice
-                soma=0.d0
-                y=0
-                xf = x
-                soma = soma + T0i(d1,xf)*T0i(d2,y)
-                do l=1,nt! shifts x and y by 1 in t direction
-                    xf = xf + incrementTable(xf,8)
-                    y = y + incrementTable(y,8)
-                    soma = soma + T0i(d1,xf)*T0i(d2,y)
-                    do k=1,nz! shifts x and y by 1 in z direction
-                        xf = xf + incrementTable(xf,6)
-                        y = y + incrementTable(y,6)
-                        soma = soma + T0i(d1,xf)*T0i(d2,y)
-                        do j=1,ny! shifts x and y by 1 in y direction
-                            xf = xf + incrementTable(xf,4)
-                            y = y + incrementTable(y,4)
-                            soma = soma + T0i(d1,xf)*T0i(d2,y)
-                            do i=1,nx! shifts x and y by 1 in x direction
-                                xf = xf + incrementTable(xf,2)
-                                y = y + incrementTable(y,2)
-                                soma = soma + T0i(d1,xf)*T0i(d2,y)
-                            end do
-                        end do
-                    end do
-                end do
-                TmunuCorr(d1,d2,x) = soma/dble((nx-1)*(ny-1)*(nz-1)*(nt-1)+1)
-            end do
-        end do
-    end do
-    
-    !But it is not over yet! Due to the isotropy of the 3 spatial dimensions, we can do
-    !C(x,y,z,t) = T0iT0j(x,y,z,t)
-    !C(x0,y0,z,t0) = C(x0,y0,z,t0) = C(y0,z,x0,t0) = C(y0,z,x0,t0) = C(z,x0,y0,t0) = C(z,y0,x0,t0)
-    !T0iT0j(z,t) = soma_x0=1^nx soma_y0=1^ny C(x0,y0,z,t0) + C(x0,y0,z,t0) + C(y0,z,x0,t0) + C(y0,z,x0,t0) + C(z,x0,y0,t0) + C(z,y0,x0,t0)
-    
-    !But thats not all once again. T0iT0j = T0jT0i
-    do d1=1,3
-        do d2=1,3
-            do l=1,nt
-                do k=1,nz
-                    soma = 0.d0
-                    do j=1,ny
-                        do i=1,nx
-                            soma = soma + TmunuCorr(d1,d2,position(i,j,k,l))+TmunuCorr(d1,d2,position(j,i,k,l))+TmunuCorr(d1,d2,position(i,k,j,l))+TmunuCorr(d1,d2,position(j,k,i,l))+TmunuCorr(d1,d2,position(k,i,j,l))+TmunuCorr(d1,d2,position(k,j,i,l))
-                            soma = soma + TmunuCorr(d2,d1,position(i,j,k,l))+TmunuCorr(d2,d1,position(j,i,k,l))+TmunuCorr(d2,d1,position(i,k,j,l))+TmunuCorr(d2,d1,position(j,k,i,l))+TmunuCorr(d2,d1,position(k,i,j,l))+TmunuCorr(d2,d1,position(k,j,i,l))
-                        end do
-                    end do
-                    T0iT0j(d1,d2,k,l) = T0iT0j(d1,d2,k,l) + soma/dble(6*nx*ny)
-                end do
-            end do
-        end do
-    end do
-    
     end subroutine
     
     

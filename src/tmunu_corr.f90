@@ -11,8 +11,10 @@ use lattice
 use Measurements
 implicit none
 character(len=50) :: latticeFile = ''
+character(len=50) :: filename = ''
 double precision, allocatable, dimension(:,:) :: T0i
-integer :: s,seed2
+double precision, allocatable, dimension(:,:,:) :: T0iT0j
+integer :: s,seed2,x,d1,d2
 !Load parameters (lattice size and lattice file name)
 call readArgs() 
 write(6,*) s
@@ -23,19 +25,32 @@ call load_lattice(latticeFile)
 
 !Computes T0i over the entire lattice
 allocate(T0i(3,0:nx*ny*nz*nt-1))
-call CalcT0i(T0i)
+allocate(T0iT0j(3,3,0:nx*ny*nz*nt-1))
 
+call CalcT0i(T0i)
+do x=0,nx*ny*nz*nt-1
+   do d1=1,3
+      do d2=1,3
+         T0iT0j(d1,d2,x) = T0i(d1,x)*T0i(d2,s)
+      end do
+   end do
+end do
+
+
+write(filename,"('source',I5.5,'.dat')") s
+open(unit=10,file=trim(latticeFile)//trim(filename),form="unformatted")
+write(10) T0i
+close(10)
 
 contains
    subroutine readArgs()
-      integer, parameter :: minNumberParameters = 5
-      character(len=50) :: argNx,argNy,argNz,argNt,argSourcePos
+      integer, parameter :: minNumberParameters = 6
+      character(len=50) :: argNx,argNy,argNz,argNt,argSourcePos,argBeta
       real :: r
       if(COMMAND_ARGUMENT_COUNT() .lt. minNumberParameters) then
-         print*, "It is mandatory to pass 5 arguments in the format"
-         print*, "nx ny nz nt path/to/Lattice/File [Source Position Index]"
+         print*, "It is mandatory to pass 6 arguments in the format"
+         print*, "nx ny nz nt beta path/to/Lattice/File [Source Position Index]"
          print*, "Exiting now"
-         write(6,*) COMMAND_ARGUMENT_COUNT()
          call EXIT(1)
       else
       
@@ -43,15 +58,21 @@ contains
          call GET_COMMAND_ARGUMENT(2,argNy)
          call GET_COMMAND_ARGUMENT(3,argNz)
          call GET_COMMAND_ARGUMENT(4,argNt)
-         call GET_COMMAND_ARGUMENT(5,latticeFile)
-         call GET_COMMAND_ARGUMENT(6,argSourcePos)
+         call GET_COMMAND_ARGUMENT(5,argBeta)
+         call GET_COMMAND_ARGUMENT(6,latticeFile)
+         call GET_COMMAND_ARGUMENT(7,argSourcePos)
 
          read(argNx,*) nx
          read(argNy,*) ny
          read(argNz,*) nz
          read(argNt,*) nt
+         read(argBeta,*) beta
          if (argSourcePos .ne. '') then
             read(argSourcePos,*) s
+            if (s .gt. nx*ny*nz*nt) then
+               write(6,*) "Supplied source position is greater than lattice size. Halting now."
+               call EXIT(1)
+            end if
          else
             call init_random_seed(seed2)
             CALL RANDOM_NUMBER(r)
