@@ -135,7 +135,7 @@
 
 !=====LOAD THE LATTICE FROM A FILE
       subroutine load_lattice(filename)
-      character(len=50) filename
+      character(len=1024),intent(in) :: filename
       logical :: file_exist
 
       inquire(file=filename,exist=file_exist)

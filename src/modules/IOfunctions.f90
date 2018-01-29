@@ -31,7 +31,7 @@ module IOfunctions
       end subroutine
 
       subroutine readLattice(filename)
-         character(len=50), intent(in) :: filename
+         character(len=1024), intent(in) :: filename
          open(unit=10,status='old',file=filename,form='unformatted')
          read(10) U
          close(10)
