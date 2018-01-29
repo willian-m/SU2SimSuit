@@ -10,14 +10,13 @@ use IOfunctions
 use lattice
 use Measurements
 implicit none
-character(len=50) :: latticeFile = ''
+character(len=1024) :: latticeFile = ''
 character(len=50) :: filename = ''
 double precision, allocatable, dimension(:,:) :: T0i
 double precision, allocatable, dimension(:,:,:) :: T0iT0j
 integer :: s,seed2,x,d1,d2
 !Load parameters (lattice size and lattice file name)
 call readArgs() 
-write(6,*) s
 
 !Allocates lattice and loads file
 call initiate_auxTables()
