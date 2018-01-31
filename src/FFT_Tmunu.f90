@@ -3,7 +3,7 @@
 !This program reads data generated from the
 !''tmunu_corr.f90'' program
 
-!include "mkl_dfti.f90"
+include "mkl_dfti.f90"
 
 program fftprop
 
@@ -24,7 +24,7 @@ character(1024) :: dataFile
 integer, dimension(4) :: FFTlen
 type(DFTI_DESCRIPTOR), pointer :: descHandler
 
-call readArgumentsFFTProp
+call readArgs
 
 rawDataSize = nx*ny*nz*nt !Determines the size of the data to be retrieved on each file
 allocate(rawData(rawDataSize)) !Allocates the rawData

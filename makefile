@@ -4,13 +4,12 @@ MODULES=$(SRC)/modules
 OBJ_LAT_CONF= $(BIN)/ziggurat.o $(BIN)/mathSU2.o $(BIN)/lattice.o $(BIN)/physics.o $(BIN)/MonteCarlo.o $(BIN)/IOfunctions.o
 OBJ_TENSOR= $(BIN)/ziggurat.o $(BIN)/mathSU2.o $(BIN)/lattice.o $(BIN)/physics.o $(BIN)/IOfunctions.o $(BIN)/Measurements.o
 OBJ_FFT= $(MKLROOT)/include/mkl_dfti.o
-FC=gfortran
+FC=ifort
 
 all: gen_lat_conf.run tmunu_corr.run FFT_Tmunu.run
 
-FFT_Tmunu.run: dir $(OBJ_FFT) $(SRC)/FFT_Tmunu.f90
-#	$(FC) -ffree-line-length-none -L$(MKLROOT)/lib/intel64 -static -I$(MKLROOT)/include $(MKLROOT)/include/mkl_dfti.f90 $(SRC)/FFT_Tmunu.f90 -lmkl_cdft_core -o $(BIN)/$@ 
-	$(FC) -ffree-line-length-none -I$(MKLROOT)/include $(OBJ_FFT) $(SRC)/FFT_Tmunu.f90 -o $(BIN)/$@
+FFT_Tmunu.run: dir $(SRC)/FFT_Tmunu.f90
+	$(FC) -I=$MKLROOT/include/mkl_dfti.f90 $(SRC)/FFT_Tmunu.f90 -mkl -o $(BIN)/$@
 
 gen_lat_conf.run: dir $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90
 	$(FC) -ffree-line-length-none -I$(BIN) $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90 -o $(BIN)/$@
@@ -22,7 +21,7 @@ dir:
 	mkdir -p $(BIN)
 
 $(BIN)/%.o: $(MODULES)/%.f90
-	$(FC) -ffree-line-length-none -c -J$(BIN) -o $@ $<
+	$(FC) -ffree-line-length-none -c -module $(BIN) -o $@ $<
 
 clean:
 	rm -f $(BIN)/*.o $(BIN)/*.mod $(BIN)/*.run
