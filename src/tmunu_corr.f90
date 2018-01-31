@@ -35,11 +35,14 @@ do x=0,nx*ny*nz*nt-1
    end do
 end do
 
-
-write(filename,"('source',I5.5,'.dat')") s
-open(unit=10,file=trim(latticeFile)//trim(filename),form="unformatted")
-write(10) T0i
-close(10)
+do d1=1,3
+   do d2=1,3
+      write(filename,"('source',I5.5,'i',I1.1,'j',I1.1,'.dat')") s,d1,d2
+      open(unit=10,file=trim(latticeFile)//trim(filename),form="unformatted")
+      write(10) T0iT0j(d1,d2,:)
+      close(10)
+   end do
+end do
 
 contains
    subroutine readArgs()
