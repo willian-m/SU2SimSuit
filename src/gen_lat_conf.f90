@@ -41,7 +41,7 @@
    implicit none
    !====THESE ARE NECESSARY TO RUN A BASIC SIMULATION=====
    integer :: clock,NMC,MC_time, recInterval
-   character(len=50) :: latticeFile = ''
+   character(len=1024) :: latticeFile = ''
    !======================================================
 
    call readArgs(nx,ny,nz,nt,hotStart,NMC,beta,recInterval,latticeFile) !read input parameters
