@@ -53,7 +53,7 @@ yS = (sourcePos - tS*nx*ny*nz - zS*nx*ny)/ny
 xS = sourcePos - tS*nx*ny*nz - zS*nx*ny - yS*nx
 
 !Load file
-open(unit=1,file=trim(dataFile))
+open(unit=1,file=trim(dataFile),status='old',form='unformatted')
 read(1) rawData
 close(1)
 
