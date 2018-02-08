@@ -4,24 +4,32 @@ MODULES=$(SRC)/modules
 OBJ_LAT_CONF= $(BIN)/ziggurat.o $(BIN)/mathSU2.o $(BIN)/lattice.o $(BIN)/physics.o $(BIN)/MonteCarlo.o $(BIN)/IOfunctions.o
 OBJ_TENSOR= $(BIN)/ziggurat.o $(BIN)/mathSU2.o $(BIN)/lattice.o $(BIN)/physics.o $(BIN)/IOfunctions.o $(BIN)/Measurements.o
 OBJ_FFT= $(MKLROOT)/include/mkl_dfti.o
-FC=ifort
+FC=gfortran
+
+ifeq ($(FC),ifort)
+MKL_LINK=-mkl
+endif
+ifeq ($(FC),gfortran)
+MKL_LINK=-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_rt -lpthread -lm -ldl
+endif
+
 
 all: gen_lat_conf.run tmunu_corr.run FFT_Tmunu.run
 
 FFT_Tmunu.run: dir $(SRC)/FFT_Tmunu.f90
-	$(FC) -I=$MKLROOT/include/mkl_dfti.f90 $(SRC)/FFT_Tmunu.f90 -mkl -o $(BIN)/$@
+	if [ $(FC) = ifort ]; then $(FC) -I=$(MKLROOT)/include/mkl_dfti.f90 $(SRC)/FFT_Tmunu.f90 $(MKL_LINK) -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) -m64 -I${MKLROOT}/include $(SRC)/FFT_Tmunu.f90 $(MKL_LINK) -o $(BIN)/$@; fi
 
 gen_lat_conf.run: dir $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90
-	$(FC) -ffree-line-length-none -I$(BIN) $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90 -o $(BIN)/$@
+	if [ $(FC) = ifort ]; then $(FC) -I$(BIN) $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90 -o $(BIN)/$@; elif [ $(FC) = ifort ]; then $(FC) -ffree-line-length-none -I$(BIN) $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90 -o $(BIN)/$@; fi
 
 tmunu_corr.run: dir $(OBJ_TENSOR) $(SRC)/tmunu_corr.f90
-	$(FC) -ffree-line-length-none -I$(BIN) $(OBJ_TENSOR) $(SRC)/tmunu_corr.f90 -o $(BIN)/$@
+	if [ $(FC) = ifort ]; then $(FC) -I$(BIN) $(OBJ_TENSOR) $(SRC)/tmunu_corr.f90 -o $(BIN)/$@; elif [ $(FC) = ifort ]; then $(FC) -ffree-line-length-none -I$(BIN) $(OBJ_TENSOR) $(SRC)/tmunu_corr.f90 -o $(BIN)/$@; fi
 
 dir: 
 	mkdir -p $(BIN)
 
 $(BIN)/%.o: $(MODULES)/%.f90
-	$(FC) -ffree-line-length-none -c -module $(BIN) -o $@ $<
+	if [ $(FC) = ifort ]; then $(FC) -c -module $(BIN) -o $@ $<; elif [ $(FC) = gfortran ]; then $(FC) -ffree-line-length-none -c -J$(BIN) -o $@ $<; fi
 
 clean:
 	rm -f $(BIN)/*.o $(BIN)/*.mod $(BIN)/*.run
