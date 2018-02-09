@@ -115,8 +115,8 @@
       character(len=50) :: argNx,argNy,argNz,argNt,argHotStart,argNMC,argBeta,argRecStep
 
       if (COMMAND_ARGUMENT_COUNT() .lt. minNumberParameters) then
-        print*, "It is mandatory to pass at least 7 parameters as input in the format:"
-        print*, "nx ny nz nt beta H/C NMC nTherm recordStep [lattice/Data/FilePath.dat]"
+        print*, "It is mandatory to pass at least 8 parameters as input in the format:"
+        print*, "nx ny nz nt beta H/C NMC recordStep [lattice/Data/FilePath.dat]"
         print*, "Exiting now"
         call EXIT(1)
       else
