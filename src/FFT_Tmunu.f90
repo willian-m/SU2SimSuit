@@ -17,7 +17,6 @@ integer :: rawDataSize, stat
 complex*16 :: recordSize
 real*8,dimension(:),allocatable :: spaceData, rawData
 complex*16,dimension(:),allocatable :: transformedData
-complex*16,dimension(:,:,:,:),allocatable :: FFTData
 integer :: i,j,x,y,z,t,reclen,xS,yS,zS,tS,sourcePos
 character(1024) :: dataFile
 
@@ -30,7 +29,6 @@ rawDataSize = nx*ny*nz*nt !Determines the size of the data to be retrieved on ea
 allocate(rawData(rawDataSize)) !Allocates the rawData
 allocate(spaceData(nx*ny*nz*nt)) !Allocates the data after shifting the source to the origin
 allocate(transformedData(nx*ny*nz*nt))!Vector that will store the output of the FFT 
-allocate(FFTData(0:nx/2,0:ny/2,0:nz/2,0:nt/2)) !The domain of the input is real => Relevant output is in [0,n/2]
 
 !Used by MKL_DFTI to determine the length of the DFT to be performed
 !FFTlen = (/Ns,Ns,Ns,Nt/)
@@ -94,27 +92,26 @@ end do
 !We may finally perform the fourier transform
 stat = DftiComputeForward( descHandler, spaceData, transformedData )
 
-!Now we save in the FFTData array
-!Notice: Index i has momentum k = 2*pi*i/N, i=0,N-1. But we want data in range[-N/4,N/4]. We convert to negative momentum by subtracting N
-
-do t=0,nt/2
-   do z=0,nz/2
-      do y=0,ny/2
-         do x=0,nx/2
-            FFTData(x,y,z,t) = spaceData(j)
-         end do
-      end do
-   end do
-end do
+!Now we save in the output file
+!Notice: Index i has momentum k = 2*pi*i/N, i=0,N-1. Since the input is real data, we keep only the range [0,N/2]. The remaining components are complex conjugates of these.
 
 
 inquire(iolength=reclen) recordSize
 !Now that we finished the computation, we write things to disk, deallocate memory and exit
-open(unit=1,file=trim(dataFile)//"inverted.fft",form='unformatted')
-write(1) FFTData
+open(unit=1,file=trim(dataFile)//"inverted.fft",form='unformatted',access='direct',rec=reclen)
+do t=0,nt/2
+   do z=0,nz/2
+      do y=0,ny/2
+         do x=0,nx/2
+            j=1+x+y*nx/2+z*nx*ny/4+t*nx*ny*nz/8
+            write(1,rec=j) transformedData(j)
+         end do
+      end do
+   end do
+end do
 close(1)
 
-deallocate(rawData,spaceData,transformedData,FFTData)
+deallocate(rawData,spaceData,transformedData)
 stat = DftiFreeDescriptor( descHandler )
 
 contains
