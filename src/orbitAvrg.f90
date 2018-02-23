@@ -13,12 +13,14 @@ program orbitAvrg
 implicit none
 
 type orbit
-   integer :: p2,p4,p6
+   integer*8 :: p2,p4,p6 !If the lattice is large, e.g. ns=2**6 or ns=2**7
+                         !Then we will need long integers. These numbers contains
+                         !up to 19 digits
    integer, dimension(6) :: pnts
-   complex*16 :: observable,error
+   complex*16,allocatable,dimension(:) :: observable,error
 end type
-
-integer :: numOrbits,nx,ny,nz,nt,reclen
+complex*16 :: aux
+integer :: numOrbits,nx,ny,nz,nt,reclen,o,pnt,t
 type(orbit),allocatable,dimension(:) :: orbits
 call readParameters
 call parametersCheck
@@ -26,11 +28,49 @@ call parametersCheck
 numOrbits=nx*(1+nx)*(2+nx)/6
 
 allocate(orbits(numOrbits))
-inquire(iolength=reclen) orbits(1)%observable
-open(unit=1,file='StatisticalAverage.dat',form='unformatted',access='direct',recl=reclen)
-open(unit=2,file='StatisticalErrors.dat',form='unformatted',access='direct',recl=reclen)
+do o=1,numOrbits
+   allocate(orbits(o)%observable(nt))
+   allocate(orbits(o)%error(nt))
+end do
+inquire(iolength=reclen) orbits(1)%observable(1)
 
 call computeOrbits
+
+do o=1,numOrbits
+   orbits(o)%observable = 0.d0
+   orbits(o)%error = 0.d0
+   do t=1,nt
+      do pnt=1,6
+         read(1,rec=orbits(o)%pnts(pnt)+t*nx**3) aux
+         orbits(o)%observable(t) = orbits(o)%observable(t) + aux
+         read(2,rec=orbits(o)%pnts(pnt)+t*nx**3) aux
+         orbits(o)%error(t) = orbits(o)%error(t) + aux
+      end do
+      orbits(o)%observable=orbits(o)%observable(t)/6
+      orbits(o)%error=orbits(o)%error(t)/6
+   end do
+end do
+
+close(1)
+close(2)
+
+!Now that we averaged over orbits, we write the results *in plain text*
+!Notice: We will throw away the imaginary part. Here is the reason why 
+!we do this.
+!We ommited the negative quadrants because we know that they are the 
+!complex conjugate of the positive quadrants. This does not mean they
+!should be ommited from the averaging procedure. Thus, we will have sum
+!of complex numbers with their complex conjugate and then we can safely
+!take only the real part of the numbers.
+
+open(unit=10,file="orbitAveraged.out")
+   write(10,'(A5,17X,3(A3,19X),A7,19X,A5)') '# p^2','p^4','p^6','p_t','Average','Error'
+do o=1,numOrbits
+   do t=1,nt
+      write(10,'(4(I19.19,3X),2(ES23.15E3,3X))') orbits(o)%p2,orbits(o)%p4,orbits(o)%p6,t,orbits(o)%observable(t), orbits(o)%error(t)
+   end do
+end do
+close(10)
 
 contains
 
