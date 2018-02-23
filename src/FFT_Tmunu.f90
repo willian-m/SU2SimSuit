@@ -98,7 +98,7 @@ stat = DftiComputeForward( descHandler, spaceData, transformedData )
 
 inquire(iolength=reclen) recordSize
 !Now that we finished the computation, we write things to disk, deallocate memory and exit
-open(unit=1,file=trim(dataFile)//"inverted.fft",form='unformatted',access='direct',rec=reclen)
+open(unit=1,file=trim(dataFile)//"inverted.fft",form='unformatted',access='direct',recl=reclen)
 do t=0,nt/2
    do z=0,nz/2
       do y=0,ny/2
