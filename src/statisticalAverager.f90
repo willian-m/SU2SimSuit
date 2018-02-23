@@ -26,7 +26,7 @@ average = dcmplx(0.d0,0.d0)
 
 do NMC=NMCStart,NMCEnd,step !Average over MC configurations
    !Loads the data
-   inquire(iolenght=reclen) rawData(1)
+   inquire(iolength=reclen) rawData(1)
    open(unit=NMC,access='direct',form='unformatted',recl=reclen)
    do x=1,nx*ny*nz*nt+1 !In each site
       read(unit=NMC,rec=x) rawData(x) 
@@ -64,8 +64,8 @@ end do
 
 errors = errors*(Nbins-1)/Nbins
 
-open(unit=1,file="StatisticalAverage.dat",format="unformatted",access="direct",recl=reclen)
-open(unit=2,file="StatisticalError.dat",format="unformatted",access="direct",recl=reclen)
+open(unit=1,file="StatisticalAverage.dat",form="unformatted",access="direct",recl=reclen)
+open(unit=2,file="StatisticalError.dat",form="unformatted",access="direct",recl=reclen)
 do x=1,nx*ny*nz*nt
    write(1,rec=x) average(x)
    write(2,rec=x) average(x)
@@ -100,9 +100,9 @@ contains
          read(argNy,*) ny
          read(argNz,*) nz
          read(argNt,*) nt
-         read(argMCStartStep,*) NMCStart
-         read(argMCEndStep,*) NMCEnd
-         read(argMCStepSize,*) step
+         read(argNMCStartStep,*) NMCStart
+         read(argNMCEndStep,*) NMCEnd
+         read(argNMCStepSize,*) step
       end if
    end subroutine
 

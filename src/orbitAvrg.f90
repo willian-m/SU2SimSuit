@@ -27,8 +27,8 @@ numOrbits=nx*(1+nx)*(2+nx)/6
 
 allocate(orbits(numOrbits))
 inquire(iolength=reclen) orbits(1)%observable
-open(unit=1,file="StatisticalAverage.dat",format="unformatted",access="direct",recl=reclen)
-open(unit=2,file="StatisticalErrors.dat",format="unformatted",access="direct",recl=reclen)
+open(unit=1,file='StatisticalAverage.dat',form='unformatted',access='direct',recl=reclen)
+open(unit=2,file='StatisticalErrors.dat',form='unformatted',access='direct',recl=reclen)
 
 call computeOrbits
 
@@ -51,15 +51,17 @@ contains
       call EXIT(-2)
    end if
 
-   inquire("StatisticalAverage.dat",exist=statAverExist)
-   inquire("StatisticalError.dat",exist=statErrorExist)
+   open(unit=1,file='StatisticalAverage.dat',form='unformatted',access='direct',recl=reclen)
+   open(unit=2,file='StatisticalErrors.dat',form='unformatted',access='direct',recl=reclen)
+   inquire(unit=1,exist=statAverExist)
+   inquire(unit=2,exist=statErrorExist)
 
    if (.not. statErrorExist) then
       print *, "I could not find the file containing the statistical error."
       call EXIT(-3)
    end if
 
-   if (.not. statAverExit) then
+   if (.not. statAverExist) then
       print *, "I could not find the file containing the statistical averages."
       call EXIT(-3)
    end if
