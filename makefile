@@ -14,7 +14,14 @@ MKL_LINK=-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_rt -lpthread -lm -ldl
 endif
 
 
-all: gen_lat_conf.run tmunu_corr.run FFT_Tmunu.run
+all: gen_lat_conf.run tmunu_corr.run FFT_Tmunu.run orbitAvrg.run statisticalAverager.run
+
+orbitAvrg.run: dir $(SRC)/orbitAvrg.f90
+	if [ $(FC) = ifort ]; then  $(FC) $(SRC)/orbitAvrg.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(SRC)/orbitAvrg.f90 -o $(BIN)/$@; fi
+
+statisticalAverager.run: dir $(SRC)/statisticalAverager.f90
+	if [ $(FC) = ifort ]; then  $(FC) $(SRC)/statisticalAverager.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(SRC)/statisticalAverager.f90 -o $(BIN)/$@; fi
+
 
 FFT_Tmunu.run: dir $(SRC)/FFT_Tmunu.f90
 	if [ $(FC) = ifort ]; then $(FC) -I=$(MKLROOT)/include/mkl_dfti.f90 $(SRC)/FFT_Tmunu.f90 $(MKL_LINK) -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) -m64 -I${MKLROOT}/include $(SRC)/FFT_Tmunu.f90 $(MKL_LINK) -o $(BIN)/$@; fi
