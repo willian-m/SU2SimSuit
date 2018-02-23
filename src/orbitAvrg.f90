@@ -15,9 +15,10 @@ implicit none
 type orbit
    integer :: p2,p4,p6
    integer, dimension(6) :: pnts
+   complex*16 :: observable,error
 end type
 
-integer :: numOrbits,nx,ny,nz,nt
+integer :: numOrbits,nx,ny,nz,nt,reclen
 type(orbit),allocatable,dimension(:) :: orbits
 call readParameters
 call parametersCheck
@@ -25,6 +26,9 @@ call parametersCheck
 numOrbits=nx*(1+nx)*(2+nx)/6
 
 allocate(orbits(numOrbits))
+inquire(iolength=reclen) orbits(1)%observable
+open(unit=1,file="StatisticalAverage.dat",format="unformatted",access="direct",recl=reclen)
+open(unit=2,file="StatisticalErrors.dat",format="unformatted",access="direct",recl=reclen)
 
 call computeOrbits
 

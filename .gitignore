@@ -11,3 +11,6 @@ Old/*
 
 #tmp files to be ignored
 *.swp
+
+#Ignores output folder, which is typically HUGE (can be several GB)
+output/*
