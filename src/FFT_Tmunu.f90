@@ -51,9 +51,11 @@ yS = (sourcePos - tS*nx*ny*nz - zS*nx*ny)/ny
 xS = sourcePos - tS*nx*ny*nz - zS*nx*ny - yS*nx
 
 !Load file
+print *, "Loading file..."
 open(unit=1,file=trim(dataFile),status='old',form='unformatted')
 read(1) rawData
 close(1)
+print *, "File loaded. Shifting source position to origin"
 
 do j=1,rawDataSize
    t = (j-1)/(nx*ny*nz)
@@ -89,9 +91,11 @@ do j=1,rawDataSize
    spaceData(1+x+y*nx+z*nx*ny+t*nx*ny*nz) = rawData(j) !MKL_DFT does not like the 4D vector
 end do
 
+print*, "Done. Computing FFT."
 !We may finally perform the fourier transform
 stat = DftiComputeForward( descHandler, spaceData, transformedData )
 
+print *, "Done. Saving file."
 !Now we save in the output file
 !Notice: Index i has momentum k = 2*pi*i/N, i=0,N-1. Since the input is real data, we keep only the range [0,N/2]. The remaining components are complex conjugates of these.
 
@@ -110,9 +114,10 @@ do t=0,nt/2
    end do
 end do
 close(1)
+print*, "Done. Have a nice day :)"
 
-deallocate(rawData,spaceData,transformedData)
 stat = DftiFreeDescriptor( descHandler )
+!deallocate(rawData,spaceData,transformedData)
 
 contains
 
