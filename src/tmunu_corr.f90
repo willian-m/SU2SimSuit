@@ -37,7 +37,7 @@ end do
 
 do d1=1,3
    do d2=1,3
-      write(filename,"('source',I5.5,'i',I1.1,'j',I1.1,'.dat')") s,d1,d2
+      write(filename,"('source',I5.5,'ij',I1.1,I1.1,'.dat')") s,d1,d2
       open(unit=10,file=trim(latticeFile)//trim(filename),form="unformatted")
       write(10) T0iT0j(d1,d2,:)
       close(10)
