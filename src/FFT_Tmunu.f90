@@ -113,7 +113,7 @@ do t=0,nt/2
    do z=0,nz/2
       do y=0,ny/2
          do x=0,nx/2
-            j=1+x+y*nx/2+z*nx*ny/4+t*nx*ny*nz/8
+            j=1+x+y*(nx/2+1)+z*(nx/2+1)*(ny/2+1)+t*(nx/2+1)*(ny/2+1)*(nz/2+1)
             write(1,rec=j) transformedData(j)
          end do
       end do
