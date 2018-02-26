@@ -45,9 +45,13 @@ stat = DftiCommitDescriptor( descHandler )
 
 !The index sequence, in the order of the faster running number to the slowest one is: x, y, z, t
 !Compute source position
+if (sourcePos .gt. nx*ny*nz*nt) then
+   print *, "WARNING! SOURCE POSITION OUTSIDE LATTICE. EXITING NOW"
+   call EXIT(-1)
+end if
 tS = sourcePos/(nx*ny*nz)
 zS = (sourcePos - tS*nx*ny*nz)/(nx*ny)
-yS = (sourcePos - tS*nx*ny*nz - zS*nx*ny)/ny
+yS = (sourcePos - tS*nx*ny*nz - zS*nx*ny)/nx
 xS = sourcePos - tS*nx*ny*nz - zS*nx*ny - yS*nx
 
 !Load file
@@ -59,10 +63,12 @@ print *, "File loaded. Shifting source position to origin"
 
 do j=1,rawDataSize
    t = (j-1)/(nx*ny*nz)
-   z = (j-1 - t*nx*ny*nz)/(nx*ny*nz)
-   y = (j-1 - t*nx*ny*nz - z*nx*ny)/ny
+   z = (j-1 - t*nx*ny*nz)/(nx*ny)
+   y = (j-1 - t*nx*ny*nz - z*nx*ny)/nx
    x = j-1 - t*nx*ny*nz - z*nx*ny - y*nx
 
+!   print *, t,z,y,x
+!   print *, ""
    !We will shift the indexes, so the source is on the origin
    if (tS .gt. t) then
       t = nt + t - tS
@@ -117,7 +123,7 @@ close(1)
 print*, "Done. Have a nice day :)"
 
 stat = DftiFreeDescriptor( descHandler )
-!deallocate(rawData,spaceData,transformedData)
+deallocate(rawData,spaceData,transformedData)
 
 contains
 
