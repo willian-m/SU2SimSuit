@@ -37,5 +37,4 @@ done
 #We once again fix this
 mkdir -p $DIR/output/FFT_T0iT0j
 mv $DIR/output/T0iT0j/*.fft $DIR/output/FFT_T0iT0j/
-
 cd $DIR
