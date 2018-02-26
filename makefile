@@ -4,7 +4,7 @@ MODULES=$(SRC)/modules
 OBJ_LAT_CONF= $(BIN)/ziggurat.o $(BIN)/mathSU2.o $(BIN)/lattice.o $(BIN)/physics.o $(BIN)/MonteCarlo.o $(BIN)/IOfunctions.o
 OBJ_TENSOR= $(BIN)/ziggurat.o $(BIN)/mathSU2.o $(BIN)/lattice.o $(BIN)/physics.o $(BIN)/IOfunctions.o $(BIN)/Measurements.o
 OBJ_FFT= $(MKLROOT)/include/mkl_dfti.o
-FC=ifort
+FC=gfortran
 
 ifeq ($(FC),ifort)
 MKL_LINK=-mkl
