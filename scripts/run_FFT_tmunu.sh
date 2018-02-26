@@ -9,7 +9,7 @@ Nt=8
 BETA=2.8
 filePath=$DIR/output/T0iT0j/links008008008008beta2.80Sweep
 COUNTER=1000
-ENDCOUNTER=2000
+ENDCOUNTER=10000
 STEP=10
 
 #--------------------------------------------
