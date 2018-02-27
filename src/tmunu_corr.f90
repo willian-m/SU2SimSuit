@@ -14,7 +14,7 @@ character(len=1024) :: latticeFile = ''
 character(len=50) :: filename = ''
 real*8, allocatable, dimension(:,:) :: T0i
 real*8, allocatable, dimension(:,:,:) :: T0iT0j
-integer :: s,seed2,x,d1,d2
+integer :: s,seed2,x,d1,d2,record_len
 !Load parameters (lattice size and lattice file name)
 call readArgs() 
 
@@ -35,12 +35,16 @@ do x=0,nx*ny*nz*nt-1
    end do
 end do
 
+inquire(iolength=record_len) T0iT0j(d1,d2,1)
+
 do d1=1,3
    do d2=1,3
       write(filename,"('source',I5.5,'ij',I1.1,I1.1,'.dat')") s,d1,d2
-      open(unit=10,file=trim(latticeFile)//trim(filename),form="unformatted")
-      write(10) T0iT0j(d1,d2,:)
-      close(10)
+      open(unit=11,file=trim(latticeFile)//trim(filename),form="unformatted",access='direct',recl=record_len)
+      do x=0,nx*ny*nz*nt-1
+         write(11,rec=x+1) T0iT0j(d1,d2,x)
+      end do
+      close(11)
    end do
 end do
 

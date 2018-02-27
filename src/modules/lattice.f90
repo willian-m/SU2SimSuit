@@ -42,7 +42,7 @@
       module lattice
 
       use mathSU2
-
+      
       implicit none
       integer :: nx,ny,nz,nt
       logical :: hotStart
@@ -137,13 +137,21 @@
       subroutine load_lattice(filename)
       character(len=1024),intent(in) :: filename
       logical :: file_exist
-
+      integer :: record_len,dir
+      integer*8 :: i
       inquire(file=filename,exist=file_exist)
+
       if (file_exist) then
          allocate(U(8,0:nx*ny*nz*nt-1))
-         open(unit=1,file=filename,form='unformatted',status='old')
-         read(1) U
-         close(1)
+         !Do not use readLattice subroutine here from IOfunctions under punishment of circular module use.
+         inquire(iolength=record_len) U(1,1)%a
+         open(unit=1,status='old',file=filename,form='unformatted',access='direct',recl=record_len)
+         do i=0,nx*ny*nz*nt-1
+            do dir=1,8
+               read(1,rec=dir+8*i) U(dir,i)%a
+            end do
+         end do
+         close(1)   
       else
          write(6,*) "File ",filename,"not found. Aborting."
          call exit(-1)
