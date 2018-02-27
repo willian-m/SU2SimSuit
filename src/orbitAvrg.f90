@@ -22,25 +22,34 @@ end type
 complex*16 :: aux
 integer :: numOrbits,nx,ny,nz,nt,reclen,o,pnt,t
 type(orbit),allocatable,dimension(:) :: orbits
+
+print *, "Reading parameters.."
 call readParameters
+inquire(iolength=reclen) aux
 call parametersCheck
 
 numOrbits=nx*(1+nx)*(2+nx)/6
 
+print *, "Allocating arrays..."
 allocate(orbits(numOrbits))
 do o=1,numOrbits
    allocate(orbits(o)%observable(nt))
    allocate(orbits(o)%error(nt))
 end do
-inquire(iolength=reclen) orbits(1)%observable(1)
 
+print *, "Computing orbits..."
 call computeOrbits
 
+print *, "Averaging over orbits..."
 do o=1,numOrbits
    orbits(o)%observable = 0.d0
    orbits(o)%error = 0.d0
    do t=1,nt
       do pnt=1,6
+         if (orbits(o)%pnts(pnt)+t*nx**3 .gt. nx*ny*nz*nt) then
+            print *, "I jumped outside the lattice. Exiting."
+            call exit(-1)
+         end if
          read(1,rec=orbits(o)%pnts(pnt)+t*nx**3) aux
          orbits(o)%observable(t) = orbits(o)%observable(t) + aux
          read(2,rec=orbits(o)%pnts(pnt)+t*nx**3) aux
@@ -54,6 +63,7 @@ end do
 close(1)
 close(2)
 
+print *,"Writting data to file..."
 !Now that we averaged over orbits, we write the results *in plain text*
 !Notice: We will throw away the imaginary part. Here is the reason why 
 !we do this.
@@ -71,6 +81,11 @@ do o=1,numOrbits
    end do
 end do
 close(10)
+
+deallocate(orbits)
+
+print *, "Done! All tasks completed."
+print *, "It is logical to me to exit now. Live Long and Prosper \\//_"
 
 contains
 
@@ -168,7 +183,7 @@ contains
    outz(6)=mx
 
    do si=1,6
-      outIndex = outx(si) + (outy(si)-1)*nx + (outz(si)-1)*nx*ny
+      outIndex(si) = outx(si) + (outy(si)-1)*nx + (outz(si)-1)*nx*ny
    end do
 
    end subroutine
