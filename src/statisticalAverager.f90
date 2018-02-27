@@ -73,7 +73,7 @@ open(unit=1,file="StatisticalAverage.dat",form="unformatted",access="direct",rec
 open(unit=2,file="StatisticalError.dat",form="unformatted",access="direct",recl=reclen)
 do x=1,nx*ny*nz*nt
    write(1,rec=x) average(x)
-   write(2,rec=x) average(x)
+   write(2,rec=x) errors(x)
 end do
 close(1)
 close(2)
