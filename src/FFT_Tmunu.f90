@@ -17,7 +17,7 @@ integer :: rawDataSize, stat
 complex*16 :: recordSize
 real*8,dimension(:),allocatable :: spaceData, rawData
 complex*16,dimension(:),allocatable :: transformedData
-integer :: i,j,x,y,z,t,reclen,xS,yS,zS,tS,sourcePos
+integer :: i,j,x,y,z,t,reclen,xS,yS,zS,tS,sourcePos,record_len
 character(1024) :: dataFile
 
 integer, dimension(4) :: FFTlen
@@ -26,9 +26,9 @@ type(DFTI_DESCRIPTOR), pointer :: descHandler
 call readArgs
 
 rawDataSize = nx*ny*nz*nt !Determines the size of the data to be retrieved on each file
-allocate(rawData(rawDataSize)) !Allocates the rawData
-allocate(spaceData(nx*ny*nz*nt)) !Allocates the data after shifting the source to the origin
-allocate(transformedData(nx*ny*nz*nt))!Vector that will store the output of the FFT 
+allocate(rawData(0:rawDataSize-1)) !Allocates the rawData
+allocate(spaceData(0:rawDataSize-1)) !Allocates the data after shifting the source to the origin
+allocate(transformedData(0:rawDataSize-1))!Vector that will store the output of the FFT 
 
 !Used by MKL_DFTI to determine the length of the DFT to be performed
 !FFTlen = (/Ns,Ns,Ns,Nt/)
@@ -56,8 +56,11 @@ xS = sourcePos - tS*nx*ny*nz - zS*nx*ny - yS*nx
 
 !Load file
 print *, "Loading file..."
-open(unit=1,file=trim(dataFile),status='old',form='unformatted')
-read(1) rawData
+inquire(iolength=record_len) pi
+open(unit=1,file=trim(dataFile),status='old',form='unformatted',access='direct',recl=record_len)
+do j=1,rawDataSize
+   read(1,rec=j) rawData(j-1)
+end do
 close(1)
 print *, "File loaded. Shifting source position to origin"
 
@@ -94,7 +97,8 @@ do j=1,rawDataSize
       x = x - xS
    end if
 
-   spaceData(1+x+y*nx+z*nx*ny+t*nx*ny*nz) = rawData(j) !MKL_DFT does not like the 4D vector
+   spaceData(x+y*nx+z*nx*ny+t*nx*ny*nz) = rawData(j-1) !MKL_DFT does not like the 4D vector
+   print *, x+y*nx+z*nx*ny+t*nx*ny*nz
 end do
 
 print*, "Done. Computing FFT."
@@ -108,20 +112,22 @@ print *, "Done. Saving file."
 
 inquire(iolength=reclen) recordSize
 !Now that we finished the computation, we write things to disk, deallocate memory and exit
-open(unit=1,file=trim(dataFile)//"inverted.fft",form='unformatted',access='direct',recl=reclen)
+open(unit=10,file=trim(dataFile)//"inverted.fft",form='unformatted',access='direct',recl=reclen)
 do t=0,nt/2
    do z=0,nz/2
       do y=0,ny/2
          do x=0,nx/2
-            j=1+x+y*(nx/2+1)+z*(nx/2+1)*(ny/2+1)+t*(nx/2+1)*(ny/2+1)*(nz/2+1)
-            write(1,rec=j) transformedData(j)
+            j=x+y*(nx/2+1)+z*(nx/2+1)*(ny/2+1)+t*(nx/2+1)*(ny/2+1)*(nz/2+1)
+            write(10,rec=j+1) transformedData(j)
+!            print *, j,spaceData(j)
          end do
       end do
    end do
 end do
-close(1)
+close(10)
+print*, trim(dataFile)
 print*, "Done. Have a nice day :)"
-
+read(5,*)
 stat = DftiFreeDescriptor( descHandler )
 deallocate(rawData,spaceData,transformedData)
 
