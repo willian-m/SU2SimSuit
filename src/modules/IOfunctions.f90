@@ -19,6 +19,8 @@ module IOfunctions
    use lattice
    implicit none
    integer :: record_len
+
+   private :: record_len
    contains
       
       subroutine writeLattice(sweepNum)
