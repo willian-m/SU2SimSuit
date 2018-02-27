@@ -1,1 +1,1 @@
-od --format=f8 $1
+od -Ad -v --format=f8 $1
