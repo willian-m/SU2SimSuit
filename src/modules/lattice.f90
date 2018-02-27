@@ -46,7 +46,7 @@
       implicit none
       integer :: nx,ny,nz,nt
       logical :: hotStart
-      double precision :: beta
+      real*8 :: beta
 
       !A SU(N) matrix can be specified by using N^2 real numbers. You can generate
       !the matrix by performing the operation
@@ -57,7 +57,7 @@
       !
       !sum_{i=1}^{N^2} a(i)^2 = 1
       type :: su2matrix
-        double precision,dimension(4) :: a
+        real*8,dimension(4) :: a
       end type su2matrix
 
       TYPE(su2matrix), allocatable, target :: U(:,:)

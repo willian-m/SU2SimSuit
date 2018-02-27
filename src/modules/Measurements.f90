@@ -4,7 +4,7 @@ module Measurements
     use mathSU2
     implicit none
     
-    double precision, dimension(:,:), allocatable :: V
+    real*8, dimension(:,:), allocatable :: V
 
 
     contains
@@ -15,7 +15,7 @@ module Measurements
     integer, intent(in) :: mu,nu,i,j,k,l
     type(su2matrix), intent(out) :: F
     integer :: x,m
-    double precision, dimension(4) :: plaq,Q1,Q2
+    real*8, dimension(4) :: plaq,Q1,Q2
     
     x=position(i,j,k,l)
     do m=1,4
@@ -68,9 +68,9 @@ module Measurements
 !===Compute Off-Diagonal tensor components at temporal direction of the entire lattice
     subroutine CalcT0i(T0i)
     integer :: mu,nu,x,i,j,k,l
-    double precision, dimension(3,0:nx*ny*nz*nt-1), intent(out) :: T0i
+    real*8, dimension(3,0:nx*ny*nz*nt-1), intent(out) :: T0i
     type(su2matrix),dimension(3,0:nx*ny*nz*nt-1) :: F0i
-    double precision, dimension(4) ::Uaux
+    real*8, dimension(4) ::Uaux
     
     !Compute Fmunu over the entire lattice
     do l=1,nt
@@ -119,7 +119,7 @@ module Measurements
     end subroutine
 
 !===Computes polyakov loop 
-    double precision function polyakovLoop()
+    real*8 function polyakovLoop()
     implicit none
     type(su2matrix) :: TL
     type(su2matrix) :: Uaux
@@ -150,7 +150,7 @@ module Measurements
     !Note: returns the Trace of the Wilson Loop of size r by t.
     !We also average the loop over the entire lattice and change the direction over the 3 spatial directions
     !Notice
-    double precision function latticePotential(r,t)
+    real*8 function latticePotential(r,t)
     implicit none
     integer,intent(in) :: r,t
     type(su2matrix) :: WL1,WL2,TT1,TT2 !The 2 Wilson Lines and the 2 Temporal Transporters

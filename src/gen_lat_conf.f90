@@ -108,7 +108,7 @@
       integer, intent(out) :: NMC,RecStep
       logical, intent(out) :: hotStart
       character(len=50) :: latticeFile
-      double precision, intent(out) :: beta
+      real*8, intent(out) :: beta
       !Internal variables
       integer, parameter :: minNumberParameters = 8 !Change this if input changes
       integer, parameter :: maxNumberParameters = 9 !Change this if input changes

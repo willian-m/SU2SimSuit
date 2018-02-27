@@ -28,10 +28,10 @@
 
 
 !=====COMPUTES AVERAGE
-      double precision function average(array,arraySize,startSlice,endSlice)
+      real*8 function average(array,arraySize,startSlice,endSlice)
       integer, intent(in) :: arraySize,startSlice,endSlice
-      double precision, dimension(arraySize), intent(in) :: array
-      double precision :: soma
+      real*8, dimension(arraySize), intent(in) :: array
+      real*8 :: soma
       integer :: i
 
       soma = 0.d0
@@ -42,10 +42,10 @@
       end function average
 
 !=====COMPUTES STANDARD DEVIATION
-      double precision function std(array,arraySize,startSlice,endSlice)
+      real*8 function std(array,arraySize,startSlice,endSlice)
       integer, intent(in) :: arraySize,startSlice,endSlice
-      double precision, dimension(arraySize), intent(in) :: array
-      double precision :: soma, avrg
+      real*8, dimension(arraySize), intent(in) :: array
+      real*8 :: soma, avrg
       integer :: i
 
       soma = 0.d0
@@ -60,9 +60,9 @@
 !=====COMPUTES CORRELATION FUNCTION
       subroutine corr_func(array,arraySize,startSlice,endSlice,corrFunc)
       integer, intent(in) :: arraySize,startSlice,endSlice
-      double precision, dimension(arraySize), intent(in) :: array
-      double precision, allocatable, intent(out), dimension(:) :: corrFunc
-      double precision :: soma, avrg, norm
+      real*8, dimension(arraySize), intent(in) :: array
+      real*8, allocatable, intent(out), dimension(:) :: corrFunc
+      real*8 :: soma, avrg, norm
       integer :: i,j, maxCorrFuncSize
 
       maxCorrFuncSize = (endSlice - startSlice)
@@ -105,11 +105,11 @@
       end subroutine corr_func
 
 !=====COMPUTES INTEGRATED CORRELATION TIME
-      double precision function corr_time(corrFunc)
+      real*8 function corr_time(corrFunc)
       implicit none
-      double precision,dimension(1000),intent(in) :: corrFunc
+      real*8,dimension(1000),intent(in) :: corrFunc
       integer :: i,m = 0
-      double precision :: tau = 1.d0
+      real*8 :: tau = 1.d0
 
 
       !print *, size(corrFunc)
@@ -127,12 +127,12 @@
       end function
 
 !=====COMPUTES ERROR ESTIMATOR BY BINNING
-      double precision function binningError(array,arraySize,startSlice,endSlice,cTime)
+      real*8 function binningError(array,arraySize,startSlice,endSlice,cTime)
       integer, intent(in) :: arraySize,startSlice,endSlice
-      double precision, intent(in) :: cTime
-      double precision, dimension(arraySize), intent(in) :: array
-      double precision, allocatable, dimension (:) :: binnedData
-      double precision :: soma, avrg,aux
+      real*8, intent(in) :: cTime
+      real*8, dimension(arraySize), intent(in) :: array
+      real*8, allocatable, dimension (:) :: binnedData
+      real*8 :: soma, avrg,aux
       integer :: i, nBins, binSize
 
       soma = 0.d0

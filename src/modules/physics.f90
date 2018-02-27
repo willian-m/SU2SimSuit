@@ -27,10 +27,10 @@
       CONTAINS
 
 !=====ACTION FUNCTION
-      double precision function computeS()
+      real*8 function computeS()
       implicit none
-      double precision :: soma
-      double precision, dimension(4) :: plaq
+      real*8 :: soma
+      real*8, dimension(4) :: plaq
       integer :: i,j,k,l,d1,d2
 
       soma = 0.d0
@@ -57,9 +57,9 @@
       subroutine plaquette(dir1,dir2,i,j,k,l,plaq)
       implicit none
       integer, intent(in) :: dir1,dir2,i,j,k,l
-      double precision, dimension(4),intent(out) :: plaq
+      real*8, dimension(4),intent(out) :: plaq
       integer :: x0,x1,x2,x3
-      double precision, dimension(4) :: U_temp1,U_temp2
+      real*8, dimension(4) :: U_temp1,U_temp2
 !      integer :: a1,a2
 
 
@@ -100,9 +100,9 @@
       subroutine computeStaplesSet(i,j,k,l,dir,staples)
       implicit none
       integer, intent(in) :: i,j,k,l,dir
-      double precision,dimension(4,6),intent(out) :: staples
+      real*8,dimension(4,6),intent(out) :: staples
       integer :: x0,x1,x2,y0,y1,y2,dir2,o
-      double precision, dimension(4) :: U_temp1,U_temp2
+      real*8, dimension(4) :: U_temp1,U_temp2
 
 
       o=1
@@ -210,9 +210,9 @@
 !=====COMPUTE MEAN FIELD
       subroutine computeMeanField(staples,mField)
       implicit none
-      double precision,dimension(4,6),intent(in) :: staples
-      double precision, dimension(4), intent(out) :: mField
-      double precision, dimension(4) :: Uaux
+      real*8,dimension(4,6),intent(in) :: staples
+      real*8, dimension(4), intent(out) :: mField
+      real*8, dimension(4) :: Uaux
       integer :: m
 
       !computes staples
@@ -232,12 +232,12 @@
 
 !=====COMPUTE NEW LINK VARIABLE FROM MEAN FIELD --- GATTRINGER BOOK
       subroutine computeNewU(c,meanField,UPrime)
-      double precision,intent(in) :: c
-      double precision,dimension(4),intent(in) :: meanField
-      double precision,dimension(4),intent(out) :: UPrime
-      double precision,dimension(4) :: Uaux,Uaux2,Ubar
-      double precision :: lambdaSquare,aux,temp
-      double precision,dimension(4) :: r
+      real*8,intent(in) :: c
+      real*8,dimension(4),intent(in) :: meanField
+      real*8,dimension(4),intent(out) :: UPrime
+      real*8,dimension(4) :: Uaux,Uaux2,Ubar
+      real*8 :: lambdaSquare,aux,temp
+      real*8,dimension(4) :: r
       integer :: i
 
       do i=1,4
@@ -262,11 +262,11 @@
 
 !=====UPDATE S GIVEN A NEW LINK AND A MEAN FIELD (A SUM OF STAPLES SURROUNDING THE UPDATED LINK)
       subroutine updateSMeanField(i,j,k,l,dir,S,staples,UPrime)
-      double precision,dimension(4,6),intent(in) :: staples
+      real*8,dimension(4,6),intent(in) :: staples
       integer,intent(in) :: i,j,k,l,dir
-      double precision,intent(inout) :: S
-      double precision, dimension(4),intent(in) :: UPrime
-      double precision, dimension(4) :: Uaux
+      real*8,intent(inout) :: S
+      real*8, dimension(4),intent(in) :: UPrime
+      real*8, dimension(4) :: Uaux
       integer :: o,x,y
     
       x = position(i,j,k,l)
@@ -312,11 +312,11 @@
 
 !=====COMPUTE NEW LINK VARIABLE FROM MEAN FIELD --- CREUTZ PAPER
       subroutine computeNewU_Creutz(c,meanField,UPrime)
-      double precision,intent(in) :: c
-      double precision,dimension(4),intent(in) :: meanField
-      double precision,dimension(4),intent(out) :: UPrime
-      double precision,dimension(4) :: Uaux,Uaux2,Ubar
-      double precision :: r,r2,aux,temp
+      real*8,intent(in) :: c
+      real*8,dimension(4),intent(in) :: meanField
+      real*8,dimension(4),intent(out) :: UPrime
+      real*8,dimension(4) :: Uaux,Uaux2,Ubar
+      real*8 :: r,r2,aux,temp
 
       !Generate random uniform number in the interval [exp(-beta c),1]
       
