@@ -37,8 +37,11 @@ do o=1,numOrbits
    allocate(orbits(o)%error(nt))
 end do
 
-print *, "Computing orbits..."
+print *, "There are", numOrbits, "orbits"
+print *, "Computing points in each orbit..."
 call computeOrbits
+
+
 
 print *, "Averaging over orbits..."
 do o=1,numOrbits
@@ -46,17 +49,22 @@ do o=1,numOrbits
    orbits(o)%error = 0.d0
    do t=1,nt
       do pnt=1,6
-         if (orbits(o)%pnts(pnt)+t*nx**3 .gt. nx*ny*nz*nt) then
-            print *, "I jumped outside the lattice. Exiting."
-            call exit(-1)
-         end if
-         read(1,rec=orbits(o)%pnts(pnt)+t*nx**3) aux
+!         if (orbits(o)%pnts(pnt)+t*nx**3 .gt. nx*ny*nz*nt) then
+!            print *, "I jumped outside the lattice. Exiting."
+!            print *, "Lattice size:",nx*ny*nz*nt
+!            print *, "t=",t
+!            print *, "pnt=",orbits(o)%pnts(pnt)
+!            call exit(-1)
+!         end if
+
+         read(1,rec=orbits(o)%pnts(pnt)+(t-1)*nx**3) aux
          orbits(o)%observable(t) = orbits(o)%observable(t) + aux
-         read(2,rec=orbits(o)%pnts(pnt)+t*nx**3) aux
+         read(2,rec=orbits(o)%pnts(pnt)+(t-1)*nx**3) aux
          orbits(o)%error(t) = orbits(o)%error(t) + aux
       end do
       orbits(o)%observable=orbits(o)%observable(t)/6
       orbits(o)%error=orbits(o)%error(t)/6
+!      print *, o*t, "averages of", nt*numOrbits, "completed." 
    end do
 end do
 
@@ -77,7 +85,7 @@ open(unit=10,file="orbitAveraged.out")
    write(10,'(A5,17X,3(A3,19X),A7,19X,A5)') '# p^2','p^4','p^6','p_t','Average','Error'
 do o=1,numOrbits
    do t=1,nt
-      write(10,'(4(I19.19,3X),2(ES23.15E3,3X))') orbits(o)%p2,orbits(o)%p4,orbits(o)%p6,t,orbits(o)%observable(t), orbits(o)%error(t)
+      write(10,'(4(I19.19,3X),2(ES23.15E3,3X))') orbits(o)%p2,orbits(o)%p4,orbits(o)%p6,t,dble(orbits(o)%observable(t)), dble(orbits(o)%error(t))
    end do
 end do
 close(10)
@@ -107,7 +115,7 @@ contains
    end if
 
    open(unit=1,file='StatisticalAverage.dat',form='unformatted',access='direct',recl=reclen)
-   open(unit=2,file='StatisticalErrors.dat',form='unformatted',access='direct',recl=reclen)
+   open(unit=2,file='StatisticalError.dat',form='unformatted',access='direct',recl=reclen)
    inquire(unit=1,exist=statAverExist)
    inquire(unit=2,exist=statErrorExist)
 
