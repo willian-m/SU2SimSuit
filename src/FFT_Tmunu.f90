@@ -15,8 +15,8 @@ real*8,parameter :: pi = 4.d0*datan(1.d0)
 integer :: nx, ny, nz, nt
 integer :: rawDataSize, stat
 complex*16 :: recordSize
-real*8,dimension(:),allocatable :: spaceData, rawData
-complex*16,dimension(:),allocatable :: transformedData
+real*8,dimension(:),allocatable :: rawData
+complex*16,dimension(:),allocatable :: spaceData
 integer :: i,j,x,y,z,t,reclen,xS,yS,zS,tS,sourcePos,record_len
 character(1024) :: dataFile
 
@@ -28,7 +28,7 @@ call readArgs
 rawDataSize = nx*ny*nz*nt !Determines the size of the data to be retrieved on each file
 allocate(rawData(0:rawDataSize-1)) !Allocates the rawData
 allocate(spaceData(0:rawDataSize-1)) !Allocates the data after shifting the source to the origin
-allocate(transformedData(0:rawDataSize-1))!Vector that will store the output of the FFT 
+!allocate(transformedData(0:rawDataSize-1))!Vector that will store the output of the FFT 
 
 !Used by MKL_DFTI to determine the length of the DFT to be performed
 !FFTlen = (/Ns,Ns,Ns,Nt/)
@@ -40,7 +40,7 @@ allocate(transformedData(0:rawDataSize-1))!Vector that will store the output of 
 stat = DftiCreateDescriptor( descHandler, DFTI_DOUBLE, DFTI_REAL, 4, (/nx,ny,nz,nt/) )
 stat = DftiSetValue( descHandler, DFTI_FORWARD_SCALE, 1)
 stat = DftiSetValue( descHandler, DFTI_BACKWARD_SCALE, 1)
-stat = DftiSetValue( descHandler, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
+stat = DftiSetValue( descHandler, DFTI_PLACEMENT, DFTI_INPLACE)
 stat = DftiCommitDescriptor( descHandler )
 
 !The index sequence, in the order of the faster running number to the slowest one is: x, y, z, t
@@ -97,13 +97,13 @@ do j=1,rawDataSize
       x = x - xS
    end if
 
-   spaceData(x+y*nx+z*nx*ny+t*nx*ny*nz) = rawData(j-1) !MKL_DFT does not like the 4D vector
-   print *, x+y*nx+z*nx*ny+t*nx*ny*nz
+   spaceData(x+y*nx+z*nx*ny+t*nx*ny*nz) = dcmplx(rawData(j-1),0.d0) !MKL_DFT does not like the 4D vector
+ !  print *, x+y*nx+z*nx*ny+t*nx*ny*nz
 end do
 
 print*, "Done. Computing FFT."
 !We may finally perform the fourier transform
-stat = DftiComputeForward( descHandler, spaceData, transformedData )
+stat = DftiComputeForward( descHandler, spaceData )
 
 print *, "Done. Saving file."
 !Now we save in the output file
@@ -118,7 +118,7 @@ do t=0,nt/2
       do y=0,ny/2
          do x=0,nx/2
             j=x+y*(nx/2+1)+z*(nx/2+1)*(ny/2+1)+t*(nx/2+1)*(ny/2+1)*(nz/2+1)
-            write(10,rec=j+1) transformedData(j)
+            write(10,rec=j+1) spaceData(j)
 !            print *, j,spaceData(j)
          end do
       end do
@@ -127,9 +127,9 @@ end do
 close(10)
 print*, trim(dataFile)
 print*, "Done. Have a nice day :)"
-read(5,*)
+!read(5,*)
 stat = DftiFreeDescriptor( descHandler )
-deallocate(rawData,spaceData,transformedData)
+deallocate(rawData,spaceData)
 
 contains
 
