@@ -242,7 +242,7 @@
 
       do i=1,4
           call RANDOM_NUMBER(r(i))
-          r(i) = 1-r(i)
+          r(i) = 1-r(i) !r(i) is in [0,1[ range. This put it on the desired ]0,1] range
       end do
       
       lambdaSquare = - (dlog(r(1)) + ((dcos(2*pi*r(2)))**2)*dlog(r(3)))/(2.d0*c*beta)
@@ -252,9 +252,9 @@
           !compute Ubar = meanField/c
           Ubar = meanField/c
           call hermitian_conjugate(Ubar,Uaux2)
-          Ubar = Uaux2
+          !Ubar = Uaux2
           !New lattice site
-          call matrix_multiply(Uaux,Ubar,UPrime)
+          call matrix_multiply(Uaux,Uaux2,UPrime)
       end if  
 
       end subroutine computeNewU

@@ -33,10 +33,10 @@
       double precision,dimension(4,6) :: staples
 
       !Makes the loop hitting the entire lattice
-      do i=1,nx
-      do j=1,ny
-      do k=1,nz
       do l=1,nt
+      do k=1,nz
+      do j=1,ny
+      do i=1,nx
       do d=2,8,2
         !Heat-Bath algorithm
         !http://journals.aps.org/prd/pdf/10.1103/PhysRevD.21.2308
@@ -60,6 +60,7 @@
       
       
 !=====MAKE A METROPOLIS HIT IN EACH SITE OF THE LATTICE --------> NOT WORKING
+!-----LEGACY CODE. I MAY TRY TO UPDATE IT OR REMOVE IT COMPLETELY
       subroutine metropolisIterator(S)
       implicit none
       double precision, intent(inout) :: S
