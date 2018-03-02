@@ -31,11 +31,13 @@ if (compute_all_sources) then
    s = 0
 end if
 
-do while (compute_all_sources .or. s .lt. nx*ny*nz*nt)
+
 call CalcT0i(T0i)
+do while (s .lt. nx*ny*nz*nt)
+!print *, "source=",s
 do x=0,nx*ny*nz*nt-1
-   do d1=1,3
-      do d2=1,3
+   do d2=1,3
+      do d1=1,3
          T0iT0j(d1,d2,x) = T0i(d1,x)*T0i(d2,s)
       end do
    end do
