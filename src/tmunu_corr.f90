@@ -10,6 +10,7 @@ use IOfunctions
 use lattice
 use Measurements
 implicit none
+logical,parameter :: compute_all_sources = .true.
 character(len=1024) :: latticeFile = ''
 character(len=50) :: filename = ''
 real*8, allocatable, dimension(:,:) :: T0i
@@ -26,6 +27,11 @@ call load_lattice(latticeFile)
 allocate(T0i(3,0:nx*ny*nz*nt-1))
 allocate(T0iT0j(3,3,0:nx*ny*nz*nt-1))
 
+if (compute_all_sources) then
+   s = 0
+end if
+
+do while (compute_all_sources .or. s .lt. nx*ny*nz*nt)
 call CalcT0i(T0i)
 do x=0,nx*ny*nz*nt-1
    do d1=1,3
@@ -48,6 +54,13 @@ do d1=1,3
    end do
 end do
 
+if (compute_all_sources) then
+   s = s+1
+else
+   s=s+nx*ny*nz*nt
+end if
+
+end do
 contains
    subroutine readArgs()
       integer, parameter :: minNumberParameters = 6
@@ -82,7 +95,7 @@ contains
          else
             call init_random_seed(seed2)
             CALL RANDOM_NUMBER(r)
-            s = int(real(nx*ny*nz*nt)*r)
+            s = int(real(nx*ny*nz*nt-1)*r)
          end if  
 
       end if
