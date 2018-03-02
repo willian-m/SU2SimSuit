@@ -85,7 +85,7 @@ open(unit=10,file="orbitAveraged.out")
    write(10,'(A5,17X,3(A3,19X),A7,19X,A5)') '# p^2','p^4','p^6','p_t','Average','Error'
 do o=1,numOrbits
    do t=1,nt
-      write(10,'(4(I19.19,3X),2(ES23.15E3,3X))') orbits(o)%p2,orbits(o)%p4,orbits(o)%p6,t,dble(orbits(o)%observable(t)), dble(orbits(o)%error(t))
+      write(10,'(4(I19.19,3X),2(ES23.15E3,3X))') orbits(o)%p2,orbits(o)%p4,orbits(o)%p6,t-1,dble(orbits(o)%observable(t)), dble(orbits(o)%error(t))
    end do
 end do
 close(10)
@@ -204,9 +204,9 @@ contains
    do x=1,nx
       do y=1,x
          do z=1,y
-            orbits(i)%p2 = x**2 + y**2 + z**2
-            orbits(i)%p4 = x**4 + y**4 + z**4
-            orbits(i)%p6 = x**6 + y**6 + z**6
+            orbits(i)%p2 = (x-1)**2 + (y-1)**2 + (z-1)**2
+            orbits(i)%p4 = (x-1)**4 + (y-1)**6 + (z-1)**4
+            orbits(i)%p6 = (x-1)**6 + (y-1)**6 + (z-1)**6
             call pntsInOrbit(x,y,z,orbits(i)%pnts)
             i=i+1 
          end do
