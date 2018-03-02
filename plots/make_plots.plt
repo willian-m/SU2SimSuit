@@ -1,4 +1,5 @@
 set terminal pdf enhanced color
+set yrange [.08:.09]
 set output "plots/Tmunu12.pdf"
 plot "output/orbitAveraged12.out" u 1:5:6 w yerrorbars lines 7 ps .5 , "output/orbitAveraged21.out" u 1:5:6 w yerrorbars lines 6 ps .5
 set output "plots/Tmunu13.pdf"
