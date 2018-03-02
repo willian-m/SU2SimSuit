@@ -5,8 +5,8 @@ DIR=/home/willian/git_repos/SU2SimSuit
 DIR=`pwd`
 
 #Size is N/2 + 1, since this is an average over a Fourier Transform
-Ns=5
-Nt=5
+Ns=$1
+Nt=$2
 
 #--------------------------------------------
 cd $DIR/output

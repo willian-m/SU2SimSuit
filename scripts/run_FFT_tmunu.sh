@@ -4,13 +4,12 @@
 DIR=/home/willian/git_repos/SU2SimSuit
 DIR=`pwd`
 
-Ns=8
-Nt=8
-BETA=2.8
+Ns=$1
+Nt=$2
 filePath=$DIR/output/T0iT0j/links008008008008beta2.80Sweep
-COUNTER=1000
-ENDCOUNTER=10000
-STEP=10
+COUNTER=$3
+ENDCOUNTER=$4
+STEP=$5
 
 #--------------------------------------------
 cd $DIR/output
