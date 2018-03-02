@@ -5,13 +5,13 @@ DIR=/home/willian/git_repos/SU2SimSuit
 DIR=`pwd`
 
 #Size is N/2 + 1, since this is an average over a Fourier Transform
-Ns=5
-Nt=5
+Ns=$1
+Nt=$2
 filePath=$DIR/output/FFT_T0iT0j/links008008008008beta2.80Sweep
-BEGINCOUNTER=1000
-ENDCOUNTER=2000
-STEP=10
-NBINS=20
+BEGINCOUNTER=$3
+ENDCOUNTER=$4
+STEP=$5
+NBINS=$6
 
 #--------------------------------------------
 cd $DIR/output
