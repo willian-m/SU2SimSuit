@@ -12,6 +12,11 @@ COUNTER=$4
 ENDCOUNTER=$5
 STEP=$6
 
+
+Nsf=`printf '%03d' $Ns`
+Ntf=`printf '%03d' $Nt`
+BETAf=`printf '%.2f' $BETA`
+filepath=$DIR/output/lat_conf/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
 #--------------------------------------------
 cd $DIR/output
 while [  $COUNTER -le $ENDCOUNTER ]; do #For each configuration
@@ -29,5 +34,6 @@ done
 #Program output files on the same folder as input files.
 #We fix this here
 mkdir -p $DIR/output/T0iT0j
-mv $DIR/output/lat_conf/*source*.dat $DIR/output/T0iT0j/
+find $DIR/output/lat_conf/ -name \*source\*.dat | xargs mv -t $DIR/output/T0iT0j/
+#mv $DIR/output/lat_conf/*source*.dat $DIR/output/T0iT0j/
 cd $DIR
