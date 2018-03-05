@@ -11,6 +11,11 @@ COUNTER=$3
 ENDCOUNTER=$4
 STEP=$5
 
+Nsf=`printf '%03d' $Ns`
+Ntf=`printf '%03d' $Nt`
+BETAf=`printf '%.2f' $BETA`
+filepath=$DIR/output/T0iT0j/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
+
 #--------------------------------------------
 cd $DIR/output
 i=1
@@ -38,7 +43,8 @@ while [ $COUNTER -le $ENDCOUNTER ]; do
 done
 #Once again, the output folder coincides with the input folder.
 #We once again fix this
-echo 'making Dir'$DIR/output/FFT_T0iT0j
+echo 'Making Dir'$DIR/output/FFT_T0iT0j
 mkdir -p $DIR/output/FFT_T0iT0j
-mv $DIR/output/T0iT0j/*.fft $DIR/output/FFT_T0iT0j/
+find $DIR/output/T0iT0j/ -name *.fft | xargs mv -t $DIR/output/FFT_T0iT0j/
+#mv $DIR/output/T0iT0j/*.fft $DIR/output/FFT_T0iT0j/
 cd $DIR

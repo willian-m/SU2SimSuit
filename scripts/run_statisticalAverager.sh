@@ -7,12 +7,20 @@ DIR=`pwd`
 #Size is N/2 + 1, since this is an average over a Fourier Transform
 Ns=$1
 Nt=$2
+BETA=$3
+Ps=$4
+Pt=$5
 filePath=$DIR/output/FFT_T0iT0j/links008008008008beta2.80Sweep
-BEGINCOUNTER=$3
-ENDCOUNTER=$4
-STEP=$5
-NBINS=$6
+BEGINCOUNTER=$6
+ENDCOUNTER=$7
+STEP=$8
+NBINS=$9
 
+
+Nsf=`printf '%03d' $Ns`
+Ntf=`printf '%03d' $Nt`
+BETAf=`printf '%.2f' $BETA`
+filepath=$DIR/output/FFT_T0iT0j/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
 #--------------------------------------------
 cd $DIR/output
 i=1
@@ -23,12 +31,13 @@ while [ $i -le 3 ]; do
       #Link file in the appropiate place
       while [ $COUNTER -le $ENDCOUNTER ]; do
          COUNTERf=`printf '%09d' $COUNTER`
-         filename=$(ls $filePath$COUNTERf.datsource*ij$i$j.datinverted.fft)
+         filename=$(ls $filepath$COUNTERf.datsource*ij$i$j.datinverted.fft)
+         echo $filename
          ln -s $filename fort.$COUNTER
          let COUNTER=COUNTER+STEP
       done
       #Executes the program
-      $DIR/bin/statisticalAverager.run $Ns $Ns $Ns $Nt $BEGINCOUNTER $ENDCOUNTER $STEP $NBINS
+      $DIR/bin/statisticalAverager.run $Ps $Ps $Ps $Pt $BEGINCOUNTER $ENDCOUNTER $STEP $NBINS
 #      sleep 5s
       if [ $? -eq "1" ]; then
          echo  "Something went terribly wrong!!!"
