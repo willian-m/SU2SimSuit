@@ -67,10 +67,10 @@ module Measurements
     
 !===Compute Off-Diagonal tensor components at temporal direction of the entire lattice
     subroutine CalcT0i(T0i)
-    integer :: mu,nu,x,i,j,k,l
+    integer :: mu,x,i,j,k,l
     real*8, dimension(3,0:nx*ny*nz*nt-1), intent(out) :: T0i
-    type(su2matrix),dimension(3,0:nx*ny*nz*nt-1) :: F0i
-    real*8, dimension(4) ::Uaux
+    type(su2matrix), dimension(3,0:nx*ny*nz*nt-1) :: F0i
+    real*8, dimension(4) :: Uaux
     
     !Compute Fmunu over the entire lattice
     do l=1,nt
