@@ -7,14 +7,15 @@ DIR=`pwd`
 Ns=$1
 Nt=$2
 filePath=$DIR/output/T0iT0j/links008008008008beta2.80Sweep
-COUNTER=$3
-ENDCOUNTER=$4
-STEP=$5
+BETA=$3
+COUNTER=$4
+ENDCOUNTER=$5
+STEP=$6
 
 Nsf=`printf '%03d' $Ns`
 Ntf=`printf '%03d' $Nt`
 BETAf=`printf '%.2f' $BETA`
-filepath=$DIR/output/T0iT0j/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
+filePath=$DIR/output/T0iT0j/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
 
 #--------------------------------------------
 cd $DIR/output

@@ -10,7 +10,7 @@ Nt=$2
 BETA=$3
 Ps=$4
 Pt=$5
-filePath=$DIR/output/FFT_T0iT0j/links008008008008beta2.80Sweep
+#filePath=$DIR/output/FFT_T0iT0j/links008008008008beta2.80Sweep
 BEGINCOUNTER=$6
 ENDCOUNTER=$7
 STEP=$8
@@ -32,7 +32,7 @@ while [ $i -le 3 ]; do
       while [ $COUNTER -le $ENDCOUNTER ]; do
          COUNTERf=`printf '%09d' $COUNTER`
          filename=$(ls $filepath$COUNTERf.datsource*ij$i$j.datinverted.fft)
-         echo $filename
+#         echo $filename
          ln -s $filename fort.$COUNTER
          let COUNTER=COUNTER+STEP
       done

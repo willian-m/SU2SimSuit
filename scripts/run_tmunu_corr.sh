@@ -7,7 +7,7 @@ DIR=`pwd`
 Ns=$1
 Nt=$2
 BETA=$3
-filePath=$DIR/output/lat_conf/links008008008008beta2.80Sweep
+#filePath=$DIR/output/lat_conf/links008008008008beta2.80Sweep
 COUNTER=$4
 ENDCOUNTER=$5
 STEP=$6
@@ -23,7 +23,7 @@ while [  $COUNTER -le $ENDCOUNTER ]; do #For each configuration
    echo "Processing lattice no. "$COUNTER
    COUNTERf=`printf '%09d' $COUNTER`
    
-   $DIR/bin/tmunu_corr.run $Ns $Ns $Ns $Nt $BETA $filePath$COUNTERf.dat
+   $DIR/bin/tmunu_corr.run $Ns $Ns $Ns $Nt $BETA $filepath$COUNTERf.dat
 
    if [ $? -eq "1" ]; then
       echo  "Something went terribly wrong!!!"
