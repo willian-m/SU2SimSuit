@@ -6,37 +6,51 @@ OBJ_TENSOR= $(BIN)/ziggurat.o $(BIN)/mathSU2.o $(BIN)/lattice.o $(BIN)/physics.o
 OBJ_FFT= $(MKLROOT)/include/mkl_dfti.o
 FC=gfortran
 
+MODE=R
+#MODE can be R (Release, with optimazation flags), D (Debug) or P (Profiling)
+
 ifeq ($(FC),ifort)
+
+ifeq($(MODE),D)
+endif
+ifeq($(MODE),R)
+
+endif
+ifeq($(MODE),P)
+PFLAGS=-p
+endif
+
 MKL_LINK=-mkl
 endif
+
+
 ifeq ($(FC),gfortran)
 MKL_LINK=-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_rt -lpthread -lm -ldl
 FFLAGS=-ffree-line-length-none
 endif
 
-
 all: gen_lat_conf.run tmunu_corr.run FFT_Tmunu.run orbitAvrg.run statisticalAverager.run
 
 orbitAvrg.run: dir $(SRC)/orbitAvrg.f90
-	if [ $(FC) = ifort ]; then  $(FC) -heap-size-32 $(SRC)/orbitAvrg.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) $(SRC)/orbitAvrg.f90 -o $(BIN)/$@; fi
+	if [ $(FC) = ifort ]; then  $(FC) -heap-arrays 8192 $(SRC)/orbitAvrg.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) $(SRC)/orbitAvrg.f90 -o $(BIN)/$@; fi
 
 statisticalAverager.run: dir $(SRC)/statisticalAverager.f90
-	if [ $(FC) = ifort ]; then  $(FC) -heap-size-32 $(SRC)/statisticalAverager.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) $(SRC)/statisticalAverager.f90 -o $(BIN)/$@; fi
+	if [ $(FC) = ifort ]; then  $(FC) -heap-arrays 8192 $(SRC)/statisticalAverager.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) $(SRC)/statisticalAverager.f90 -o $(BIN)/$@; fi
 
 FFT_Tmunu.run: dir $(SRC)/FFT_Tmunu.f90
-	if [ $(FC) = ifort ]; then $(FC) -heap-size-32 -I=$(MKLROOT)/include/mkl_dfti.f90 $(SRC)/FFT_Tmunu.f90 $(MKL_LINK) -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) -m64 -I${MKLROOT}/include  $(FFLAGS) $(SRC)/FFT_Tmunu.f90 $(MKL_LINK) -o $(BIN)/$@; fi
+	if [ $(FC) = ifort ]; then $(FC) -heap-arrays 8192 -I=$(MKLROOT)/include/mkl_dfti.f90 $(SRC)/FFT_Tmunu.f90 $(MKL_LINK) -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) -m64 -I${MKLROOT}/include  $(FFLAGS) $(SRC)/FFT_Tmunu.f90 $(MKL_LINK) -o $(BIN)/$@; fi
 
 gen_lat_conf.run: dir $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90
-	if [ $(FC) = ifort ]; then $(FC) -heap-size-32 -I$(BIN) $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) -I$(BIN) $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90 -o $(BIN)/$@; fi
+	if [ $(FC) = ifort ]; then $(FC) -heap-arrays 8192 -I$(BIN) $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) -I$(BIN) $(OBJ_LAT_CONF) $(SRC)/gen_lat_conf.f90 -o $(BIN)/$@; fi
 
 tmunu_corr.run: dir $(OBJ_TENSOR) $(SRC)/tmunu_corr.f90
-	if [ $(FC) = ifort ]; then $(FC) -heap-size-32 -I$(BIN) $(OBJ_TENSOR) $(SRC)/tmunu_corr.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) -I$(BIN) $(OBJ_TENSOR) $(SRC)/tmunu_corr.f90 -o $(BIN)/$@; fi
+	if [ $(FC) = ifort ]; then $(FC) $(PFLAGS) -C -heap-arrays 8192 -I$(BIN) $(OBJ_TENSOR) $(SRC)/tmunu_corr.f90 -o $(BIN)/$@; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) -I$(BIN) $(OBJ_TENSOR) $(SRC)/tmunu_corr.f90 -o $(BIN)/$@; fi
 
 dir: 
 	mkdir -p $(BIN)
 
 $(BIN)/%.o: $(MODULES)/%.f90
-	if [ $(FC) = ifort ]; then $(FC) -heap-size-32 -c -module $(BIN) -o $@ $<; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) -c -J$(BIN) -o $@ $<; fi
+	if [ $(FC) = ifort ]; then $(FC) $(PFLAGS) -heap-arrays 8192 -c -module $(BIN) -o $@ $<; elif [ $(FC) = gfortran ]; then $(FC) $(FFLAGS) -c -J$(BIN) -o $@ $<; fi
 
 clean:
 	rm -f $(BIN)/*.o $(BIN)/*.mod $(BIN)/*.run
