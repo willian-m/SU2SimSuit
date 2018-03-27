@@ -29,11 +29,12 @@ call load_lattice(latticeFile)
 allocate(T0i(3,0:nx*ny*nz*nt-1))
 allocate(T0iT0j(3,3,0:nx*ny*nz*nt-1))
 
+!Compute T0i
+call CalcT0i(T0i)
+ 
 select case (compute_all_sources)
    case (0) !What we do if we use the "random source method"
-      !Compute T0i
-      call CalcT0i(T0i)
-      !Compute the correlation function
+     !Compute the correlation function
       do x=0,nx*ny*nz*nt-1
          do d2=1,3
             do d1=1,3
@@ -46,11 +47,6 @@ select case (compute_all_sources)
 
       !Variables initialization
       T0iT0j = 0.d0
- !     allocate(coordSum(0:nx*ny*nz*nt-1,0:nx*ny*nz*nt-1)) !Do not create a table of neighbour
-                                                           !For a reasonable lattice it gets giant (32^4 => ~ 4 TB)
-      !Computation of T0i
-      call CalcT0i(T0i)
-
 
       !Sum of therms
       do at=0,nt-1
@@ -104,6 +100,27 @@ do d1=1,3
       close(11)
    end do
 end do
+
+!Uncomment to generate text files
+!do d1=1,3
+!   do d2=1,3
+!      write(filename,"('source',I5.5,'ij',I1.1,I1.1,'.out')") s,d1,d2
+!      open(unit=11,file=trim(latticeFile)//trim(filename),form="formatted")
+!      do at=0,nt-1
+!         do az=0,nz-1
+!            do ay=0,ny-1
+!               do ax=0,nx-1
+!                  x = ax + ay*nx + az*nx*ny + at*nx*ny*nz
+!                  write(11,*) ax, ay, az, at, T0iT0j(d1,d2,x)
+!               end do
+!            end do
+!         end do
+!      end do
+!      close(11)
+!   end do
+!end do
+
+deallocate(T0i,T0iT0j)
 
 contains
    subroutine readArgs()

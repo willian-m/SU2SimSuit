@@ -32,7 +32,11 @@ while [ $i -le 3 ]; do
       while [ $COUNTER -le $ENDCOUNTER ]; do
          COUNTERf=`printf '%09d' $COUNTER`
          filename=$(ls $filepath$COUNTERf.datsource*ij$i$j.datinverted.fft)
+<<<<<<< HEAD
 #         echo $filename
+=======
+         echo $filename
+>>>>>>> 11032376fa265263fe636415c45034294f274dce
          ln -s $filename fort.$COUNTER
          let COUNTER=COUNTER+STEP
       done
