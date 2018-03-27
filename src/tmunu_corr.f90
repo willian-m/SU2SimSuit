@@ -28,6 +28,7 @@ call load_lattice(latticeFile)
 !Computes T0i over the entire lattice
 allocate(T0i(3,0:nx*ny*nz*nt-1))
 allocate(T0iT0j(3,3,0:nx*ny*nz*nt-1))
+<<<<<<< HEAD
 
 select case (compute_all_sources)
    case (0) !What we do if we use the "random source method"
@@ -94,6 +95,85 @@ end select
 
 inquire(iolength=record_len) T0iT0j(d1,d2,1)
 
+=======
+
+if (compute_all_sources) then
+   s = 0
+   allocate(aux(3,3,0:nx*ny*nz*nt-1))
+   aux = 0.d0
+end if
+
+
+call CalcT0i(T0i)
+do while (s .lt. nx*ny*nz*nt)
+   do x=0,nx*ny*nz*nt-1
+      do d2=1,3
+         do d1=1,3
+            T0iT0j(d1,d2,x) = T0i(d1,x)*T0i(d2,s)
+         end do
+      end do
+   end do
+
+   !If computing all sources, we shift it to the origin and averages the result
+   if (compute_all_sources) then
+      tS = s/(nx*ny*nz)
+      zS = (s - tS*nx*ny*nz)/(nx*ny)
+      yS = (s - tS*nx*ny*nz - zS*nx*ny)/nx
+      xS = s - tS*nx*ny*nz - zS*nx*ny - yS*nx
+      do i=0,nx*ny*nz*nt-1
+         t = i/(nx*ny*nz)
+         z = (i - t*nx*ny*nz)/(nx*ny)
+         y = (i - t*nx*ny*nz - z*nx*ny)/nx
+         x = i - t*nx*ny*nz - z*nx*ny - y*nx
+
+         if (tS .gt. t) then
+            t = nt + t - tS
+         else
+            t = t - tS
+         end if
+
+         if (zS .gt. z) then
+            z = nz + z - zS
+         else
+            z = z - zS
+         end if
+
+         if (yS .gt. y) then
+            y = ny + y - yS
+         else
+            y = y - yS
+         end if
+
+         if (xS .gt. x) then
+            x = nx + x - xS
+         else
+            x = x - xS
+         end if
+         
+         x = x + y*nx + z*nx*ny + t*nx*ny*nz
+         do d2=1,3
+            do d1=1,3
+               aux(d1,d2,x) = aux(d1,d2,x) + T0iT0j(d1,d2,i)
+            end do
+         end do
+
+      end do
+      s = s+1
+   else
+      s = s+nx*ny*nz*nt
+   end if
+end do
+
+if (compute_all_sources) then
+   T0iT0j = aux/dble(nx*ny*nz*nt)
+   s = 0
+else
+   s = s-nx*ny*nz*nt
+end if
+
+inquire(iolength=record_len) T0iT0j(d1,d2,1)
+
+>>>>>>> 11032376fa265263fe636415c45034294f274dce
 do d1=1,3
    do d2=1,3
       write(filename,"('source',I5.5,'ij',I1.1,I1.1,'.dat')") s,d1,d2
