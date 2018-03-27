@@ -26,6 +26,8 @@ allocate( errors(nx*ny*nz*nt) )
 allocate( binnedData(nx*ny*nz*nt,Nbins))
 
 average = dcmplx(0.d0,0.d0)
+binnedData = dcmplx(0.d0,0.d0)
+errors = dcmplx(0.d0,0.d0)
 
 print *, "Performing statistical average..."
 do NMC=NMCStart,NMCEnd,step !Average over MC configurations
