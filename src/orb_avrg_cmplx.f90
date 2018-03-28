@@ -45,18 +45,10 @@ call computeOrbits
 
 print *, "Averaging over orbits..."
 do o=1,numOrbits
-   orbits(o)%observable = 0.d0
-   orbits(o)%error = 0.d0
+   orbits(o)%observable = dcmplx(0.d0,0.d0)
+   orbits(o)%error = dcmplx(0.d0,0.d0)
    do t=1,nt
       do pnt=1,6
-!         if (orbits(o)%pnts(pnt)+t*nx**3 .gt. nx*ny*nz*nt) then
-!            print *, "I jumped outside the lattice. Exiting."
-!            print *, "Lattice size:",nx*ny*nz*nt
-!            print *, "t=",t
-!            print *, "pnt=",orbits(o)%pnts(pnt)
-!            call exit(-1)
-!         end if
-
          read(1,rec=orbits(o)%pnts(pnt)+(t-1)*nx**3) aux
          orbits(o)%observable(t) = orbits(o)%observable(t) + aux
          read(2,rec=orbits(o)%pnts(pnt)+(t-1)*nx**3) aux
