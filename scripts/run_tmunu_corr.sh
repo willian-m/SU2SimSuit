@@ -16,20 +16,16 @@ STEP=$6
 Nsf=`printf '%03d' $Ns`
 Ntf=`printf '%03d' $Nt`
 BETAf=`printf '%.2f' $BETA`
-filepath=$DIR/output/lat_conf/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
+filePath=$DIR/output/lat_conf/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
+
 #--------------------------------------------
 cd $DIR/output
 while [  $COUNTER -le $ENDCOUNTER ]; do #For each configuration
    echo "Processing lattice no. "$COUNTER
    COUNTERf=`printf '%09d' $COUNTER`
-   
-<<<<<<< HEAD
-   $DIR/bin/tmunu_corr.run $Ns $Ns $Ns $Nt $BETA $filepath$COUNTERf.dat
-=======
+   echo $filePath$COUNTERf.dat
    $DIR/bin/tmunu_corr.run $Ns $Ns $Ns $Nt $BETA $filePath$COUNTERf.dat
->>>>>>> 11032376fa265263fe636415c45034294f274dce
-
-   if [ $? -eq "1" ]; then
+  if [ $? -eq "1" ]; then
       echo  "Something went terribly wrong!!!"
       break
    fi

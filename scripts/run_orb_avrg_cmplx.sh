@@ -18,7 +18,7 @@ while [ $i -le 3 ]; do
       #Link file in the appropiate place
       ln -s StatisticalAverage$i$j.dat StatisticalAverage.dat
       ln -s StatisticalError$i$j.dat StatisticalError.dat
-      $DIR/bin/orbitAvrg.run $Ns $Ns $Ns $Nt
+      $DIR/bin/orb_avrg_cmplx.run $Ns $Ns $Ns $Nt
       if [ $? -eq "1" ]; then
          echo  "Something went terribly wrong!!!"
          break

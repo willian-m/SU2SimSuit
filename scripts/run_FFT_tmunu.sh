@@ -16,7 +16,6 @@ Nsf=`printf '%03d' $Ns`
 Ntf=`printf '%03d' $Nt`
 BETAf=`printf '%.2f' $BETA`
 filePath=$DIR/output/T0iT0j/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
-
 #--------------------------------------------
 cd $DIR/output
 i=1

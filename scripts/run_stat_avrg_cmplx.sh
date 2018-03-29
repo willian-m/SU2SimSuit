@@ -20,7 +20,8 @@ NBINS=$9
 Nsf=`printf '%03d' $Ns`
 Ntf=`printf '%03d' $Nt`
 BETAf=`printf '%.2f' $BETA`
-filepath=$DIR/output/FFT_T0iT0j/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
+filePath=$DIR/output/FFT_T0iT0j/links"$Nsf""$Nsf""$Nsf""$Ntf"beta"$BETAf"Sweep
+
 #--------------------------------------------
 cd $DIR/output
 i=1
@@ -31,17 +32,12 @@ while [ $i -le 3 ]; do
       #Link file in the appropiate place
       while [ $COUNTER -le $ENDCOUNTER ]; do
          COUNTERf=`printf '%09d' $COUNTER`
-         filename=$(ls $filepath$COUNTERf.datsource*ij$i$j.datinverted.fft)
-<<<<<<< HEAD
-#         echo $filename
-=======
-         echo $filename
->>>>>>> 11032376fa265263fe636415c45034294f274dce
+         filename=$(ls $filePath$COUNTERf.datsource*ij$i$j.datinverted.fft)
          ln -s $filename fort.$COUNTER
          let COUNTER=COUNTER+STEP
       done
       #Executes the program
-      $DIR/bin/statisticalAverager.run $Ps $Ps $Ps $Pt $BEGINCOUNTER $ENDCOUNTER $STEP $NBINS
+      $DIR/bin/stat_avrg_cmplx.run $Ps $Ps $Ps $Pt $BEGINCOUNTER $ENDCOUNTER $STEP $NBINS
 #      sleep 5s
       if [ $? -eq "1" ]; then
          echo  "Something went terribly wrong!!!"
