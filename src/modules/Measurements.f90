@@ -84,7 +84,7 @@ module Measurements
           do nu=mu+1,4
              x = position(i,j,k,l)
              call ComputeFmunu(mu,nu,i,j,k,l,Fmunu(mu,nu,x))
-             F(nu,mu,x)%a=-F(mu,nu,x)%a
+             Fmunu(nu,mu,x)%a=-Fmunu(mu,nu,x)%a
           end do
        end do
     end do
@@ -95,7 +95,7 @@ module Measurements
     !We fill the diagonals with zero now 
     do x=0,nx*ny*nz*nt-1
        do mu=nu,4
-          F(mu,nu,x)%a=0.d0
+          Fmunu(mu,nu,x)%a=0.d0
        end do
     end do
         
@@ -105,7 +105,7 @@ module Measurements
        do nu=1,3
           T0i(nu,x) = 0.d0
           do mu=1,3
-             call matrix_multiply(Fmunu(4,mu,x)%a,Fmu(nu,mu,x)%a,Uaux)
+             call matrix_multiply(Fmunu(4,mu,x)%a,Fmunu(nu,mu,x)%a,Uaux)
              T0i(nu,x) = T0i(nu,x) + Tr(Uaux)
           end do
           T0i(nu,x) = beta*T0i(nu,x)/2.d0
@@ -117,7 +117,7 @@ module Measurements
     !Compute all gauge contributions to energy-momentum tensor
     !Under development
     subroutine CalcTmunuGaugeComplete()
-    integer :: mu, nu, i, j, k, l
+    integer :: mu, nu, i, j, k, l, x
     type(su2matrix), dimension(4,4,0:nx*ny*nz*nt-1) :: Fmunu        
 
     !Compute Fmunu over the entire lattice
@@ -132,7 +132,7 @@ module Measurements
           do nu=mu+1,4
              x = position(i,j,k,l)
              call ComputeFmunu(mu,nu,i,j,k,l,Fmunu(mu,nu,x))
-             F(nu,mu,x)%a=-F(mu,nu,x)%a
+             Fmunu(nu,mu,x)%a=-Fmunu(mu,nu,x)%a
           end do
        end do
     end do
@@ -143,13 +143,13 @@ module Measurements
     !We fill the diagonals with zero now 
     do x=0,nx*ny*nz*nt-1
        do mu=nu,4
-          F(mu,nu,x)%a=0.d0
+          Fmunu(mu,nu,x)%a=0.d0
        end do
     end do
 
 
     
-    end subroutine CalcTmunuComplete
+    end subroutine CalcTmunuGaugeComplete
     
 !===Compute a Line starting at "x0", going in direction "dir" and of size "size"
     subroutine Line(dir,x,size,WL)
