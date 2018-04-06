@@ -67,40 +67,92 @@ module Measurements
     
 !===Compute Off-Diagonal tensor components at temporal direction of the entire lattice
     subroutine CalcT0i(T0i)
-    integer :: mu,x,i,j,k,l
+    integer :: mu,nu,x,i,j,k,l
     real*8, dimension(3,0:nx*ny*nz*nt-1), intent(out) :: T0i
-    type(su2matrix), dimension(3,0:nx*ny*nz*nt-1) :: F0i
+    type(su2matrix), dimension(4,4,0:nx*ny*nz*nt-1) :: Fmunu
     real*8, dimension(4) :: Uaux
     
     !Compute Fmunu over the entire lattice
+    !We compute the upper triangle of the matrix (in mu,nu indexes) and then use the
+    !anti-symmetry property to fill the rest
     do l=1,nt
     do k=1,nz
     do j=1,ny
     do i=1,nx
-        do mu=1,3
-            x = position(i,j,k,l)
-            call ComputeFmunu(4,mu,i,j,k,l,F0i(mu,x))
-        end do
+       x = position(i,j,k,l)
+       do mu=1,4
+          do nu=mu+1,4
+             x = position(i,j,k,l)
+             call ComputeFmunu(mu,nu,i,j,k,l,Fmunu(mu,nu,x))
+             F(nu,mu,x)%a=-F(mu,nu,x)%a
+          end do
+       end do
     end do
     end do
     end do
+    end do
+
+    !We fill the diagonals with zero now 
+    do x=0,nx*ny*nz*nt-1
+       do mu=nu,4
+          F(mu,nu,x)%a=0.d0
+       end do
     end do
         
             
     !Compute T0i over the entire lattice
     do x=0,nx*ny*nz*nt-1
-        do mu=1,3
-            call matrix_multiply(F0i(mu,x)%a,F0i(mu,x)%a,Uaux)
-            T0i(mu,x) = beta*Tr(Uaux)/2.d0
+       do nu=1,3
+          T0i(nu,x) = 0.d0
+          do mu=1,3
+             call matrix_multiply(Fmunu(4,mu,x)%a,Fmu(nu,mu,x)%a,Uaux)
+             T0i(nu,x) = T0i(nu,x) + Tr(Uaux)
+          end do
+          T0i(nu,x) = beta*T0i(nu,x)/2.d0
         end do
     end do
 
-    end subroutine
+    end subroutine CalcT0i
+   
+    !Compute all gauge contributions to energy-momentum tensor
+    !Under development
+    subroutine CalcTmunuGaugeComplete()
+    integer :: mu, nu, i, j, k, l
+    type(su2matrix), dimension(4,4,0:nx*ny*nz*nt-1) :: Fmunu        
+
+    !Compute Fmunu over the entire lattice
+    !We compute the upper triangle of the matrix (in mu,nu indexes) and then use the
+    !anti-symmetry property to fill the rest
+    do l=1,nt
+    do k=1,nz
+    do j=1,ny
+    do i=1,nx
+       x = position(i,j,k,l)
+       do mu=1,4
+          do nu=mu+1,4
+             x = position(i,j,k,l)
+             call ComputeFmunu(mu,nu,i,j,k,l,Fmunu(mu,nu,x))
+             F(nu,mu,x)%a=-F(mu,nu,x)%a
+          end do
+       end do
+    end do
+    end do
+    end do
+    end do
+
+    !We fill the diagonals with zero now 
+    do x=0,nx*ny*nz*nt-1
+       do mu=nu,4
+          F(mu,nu,x)%a=0.d0
+       end do
+    end do
+
+
     
+    end subroutine CalcTmunuComplete
     
 !===Compute a Line starting at "x0", going in direction "dir" and of size "size"
     subroutine Line(dir,x,size,WL)
-    implicit none
     integer, intent(in) :: dir,x,size
     type(su2matrix),intent(out) :: WL
     type(su2matrix) :: Uaux
