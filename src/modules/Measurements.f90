@@ -15,7 +15,7 @@ module Measurements
     integer, intent(in) :: mu,nu,i,j,k,l
     type(su2matrix), intent(out) :: F
     integer :: x,m
-    real*8, dimension(4) :: plaq,Q1,Q2
+    real*8, dimension(4) :: plaq,Q1,Q2,aux
     
     x=position(i,j,k,l)
     do m=1,4
@@ -25,31 +25,33 @@ module Measurements
     
     !Starting computing first clover
     call plaquette(2*mu,2*nu,i,j,k,l,plaq) !First leaf
-    call sumSU2( Q1, plaq, Q1 )
+    call sumSU2( Q1, plaq, aux )
     
     call plaquette(2*nu,2*mu-1,i,j,k,l,plaq)! Second leaf
-    call sumSU2( Q1, plaq, Q1 )
+    call sumSU2( aux, plaq, Q1 )
     
     call plaquette(2*mu-1,2*nu-1,i,j,k,l,plaq)! Third leaf
-    call sumSU2( Q1, plaq, Q1 )
-    
+    call sumSU2( Q1, plaq, aux )
+   
     call plaquette(2*nu-1,2*mu,i,j,k,l,plaq)! Fourth leaf
-    call sumSU2( Q1, plaq, Q1 )
-    
-    
-    !Starting computing second clover
-    call plaquette(2*nu,2*mu,i,j,k,l,plaq) !First leaf
-    call sumSU2( Q2, plaq, Q2 )
-    
-    call plaquette(2*mu,2*nu-1,i,j,k,l,plaq)! Second leaf
-    call sumSU2( Q2, plaq, Q2 )
-    
-    call plaquette(2*nu-1,2*mu-1,i,j,k,l,plaq)! Third leaf
-    call sumSU2( Q2, plaq, Q2 )
-    
-    call plaquette(2*mu-1,2*nu,i,j,k,l,plaq)! Fourth leaf
-    call sumSU2( Q2, plaq, Q2 )
+    call sumSU2( aux, plaq, Q1 )
+   
  
+    !Starting computing second clover
+!    call plaquette(2*nu,2*mu,i,j,k,l,plaq) !First leaf
+!    call sumSU2( Q2, plaq, Q2 )
+    
+!    call plaquette(2*mu,2*nu-1,i,j,k,l,plaq)! Second leaf
+!    call sumSU2( Q2, plaq, Q2 )
+    
+!    call plaquette(2*nu-1,2*mu-1,i,j,k,l,plaq)! Third leaf
+!    call sumSU2( Q2, plaq, Q2 )
+    
+!    call plaquette(2*mu-1,2*nu,i,j,k,l,plaq)! Fourth leaf
+!    call sumSU2( Q2, plaq, Q2 )
+ 
+    !Second leaf is the hermitian conjugate
+    call hermitian_conjugate(Q1,Q2)
     
     !We invert the signal of Q2
     do m=1,4
